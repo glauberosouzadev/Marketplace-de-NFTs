@@ -21,6 +21,19 @@ function isEnvelope(data: unknown): data is ErrorEnvelope {
   return isErrorCode(candidate.code) && typeof candidate.message === 'string'
 }
 
+const API_ERROR_KINDS: readonly string[] = ['http', 'network', 'timeout', 'canceled']
+
+/** Type guard do `ApiError` normalizado. */
+export function isApiError(value: unknown): value is ApiError {
+  if (typeof value !== 'object' || value === null) return false
+  const candidate = value as Record<string, unknown>
+  return (
+    typeof candidate.kind === 'string' &&
+    API_ERROR_KINDS.includes(candidate.kind) &&
+    typeof candidate.message === 'string'
+  )
+}
+
 function transient(kind: ApiError['kind'], status?: number): ApiError {
   const code: ErrorCode = 'TRANSIENT'
   const base: ApiError = { kind, code, message: errorMessage(code) }
