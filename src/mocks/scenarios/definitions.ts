@@ -45,6 +45,7 @@ export const SCENARIOS: readonly Scenario[] = [
     description: `503 nas ${FIRST_FAILURES} primeiras chamadas, conexao e timeout nas primeiras.`,
     routes: {
       'GET /nfts': { failure: transient, failTimes: FIRST_FAILURES },
+      'GET /nfts/:id': { failure: transient, failTimes: FIRST_FAILURES },
       'GET /nfts/facets': { failure: { kind: 'offline' }, failTimes: FIRST_FAILURES },
       'GET /nfts/featured': { failure: { kind: 'timeout' }, failTimes: FIRST_FAILURES },
       'POST /quotes': {
