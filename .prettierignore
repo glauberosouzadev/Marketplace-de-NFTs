@@ -1,0 +1,6 @@
+dist
+node_modules
+public/mockServiceWorker.js
+src/routeTree.gen.ts
+package-lock.json
+.claude
