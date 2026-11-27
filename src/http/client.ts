@@ -1,4 +1,5 @@
 import axios, { type AxiosRequestConfig, type InternalAxiosRequestConfig } from 'axios'
+import type { ApiError } from '@/contracts'
 import { getGuestCartId, getSession } from '@/lib/storage'
 import { normalizeError } from './normalize-error'
 
@@ -10,6 +11,25 @@ function timeoutMs(): number {
 }
 
 const needsGuestCart = (url = ''): boolean => /^\/(cart|quotes)(\/|\?|$)/.test(url)
+// Além de login/cadastro (TSD-10), o logout: a própria saída já limpa tudo e não deve virar expiração.
+const isAuthEntry = (url = ''): boolean => /^\/auth\/(login|register|logout)(\/|\?|$)/.test(url)
+
+let sessionExpiredHandler: (() => void) | null = null
+
+/** Registrado por `app/providers` para `http/` não depender de router nem de Query. */
+export function setSessionExpiredHandler(handler: (() => void) | null): void {
+  sessionExpiredHandler = handler
+}
+
+/**
+ * Só a sessão que fez o pedido pode expirar: se ela já foi encerrada (outro 401 simultâneo,
+ * logout), o 401 tardio não repete a limpeza nem entra em laço.
+ */
+function notifySessionExpired(error: ApiError, url: string | undefined, sentToken: string | null) {
+  if (error.status !== 401 || error.code !== 'SESSION_EXPIRED' || isAuthEntry(url)) return
+  if (sentToken === null || getSession()?.token !== sentToken) return
+  sessionExpiredHandler?.()
+}
 
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api/v1',
@@ -44,11 +64,14 @@ export async function request<T>(config: AxiosRequestConfig): Promise<T> {
   if (external?.aborted) controller.abort()
   else external?.addEventListener('abort', onExternalAbort, { once: true })
 
+  const sentToken = getSession()?.token ?? null
   try {
     const response = await http.request<T>({ ...config, signal: controller.signal })
     return response.data
   } catch (error) {
-    throw normalizeError(error, { timedOut })
+    const apiError = normalizeError(error, { timedOut })
+    notifySessionExpired(apiError, config.url, sentToken)
+    throw apiError
   } finally {
     clearTimeout(timer)
     external?.removeEventListener('abort', onExternalAbort)

@@ -80,7 +80,9 @@ export function FeaturedCarousel({ items, onExplore }: FeaturedCarouselProps) {
               onKeyDown={onDotKeyDown}
               className="focus-visible:ring-ring flex size-6 items-center justify-center rounded-full outline-none focus-visible:ring-2"
             >
-              <span className={`size-2 rounded-full ${i === current ? 'bg-primary' : 'bg-primary/40'}`} />
+              <span
+                className={`size-2 rounded-full ${i === current ? 'bg-primary' : 'bg-primary/40'}`}
+              />
             </button>
           ))}
         </div>

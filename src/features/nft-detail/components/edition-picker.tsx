@@ -1,6 +1,6 @@
 import type { Edition } from '@/contracts'
 import { cn } from '@/lib/cn'
-import { isEditionAvailable } from '../quantity'
+import { isEditionAvailable } from '@/lib/quantity'
 
 interface EditionPickerProps {
   editions: readonly Edition[]
@@ -30,9 +30,9 @@ export function EditionPicker({ editions, selectedId, onSelect }: EditionPickerP
               <span
                 className={cn(
                   'inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-sm',
-                  'peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-card',
+                  'peer-focus-visible:ring-ring peer-focus-visible:ring-offset-card peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2',
                   'border-border text-muted-foreground lg:rounded-sm',
-                  'peer-checked:border-primary peer-checked:font-bold peer-checked:text-price',
+                  'peer-checked:border-primary peer-checked:text-price peer-checked:font-bold',
                   !available && 'border-dashed opacity-70',
                 )}
               >

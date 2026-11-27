@@ -1,7 +1,19 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { queryKeys, type Scope } from '@/app/query-keys'
-import type { AddCartItemRequest, ApiError, CartResponse } from '@/contracts'
-import { addCartItem } from '@/http/endpoints/cart'
+import type {
+  AddCartItemRequest,
+  ApiError,
+  CartResponse,
+  CouponRequest,
+  UpdateCartItemRequest,
+} from '@/contracts'
+import {
+  addCartItem,
+  clearCoupon,
+  removeCartItem,
+  setCoupon,
+  updateCartItem,
+} from '@/http/endpoints/cart'
 import { isApiError } from '@/http/normalize-error'
 import { getGuestCartId, getSession } from '@/lib/storage'
 
@@ -39,3 +51,58 @@ export function useAddToCart() {
   const client = useQueryClient()
   return useMutation(addToCartMutation(client))
 }
+
+export interface CartItemRef {
+  nftId: string
+  editionId: string
+}
+
+/** Sem retry; o erro não toca o cache; sucesso invalida carrinho e cotações do escopo capturado. */
+function scopedCartMutation<TVars>(
+  client: QueryClient,
+  mutationFn: (vars: TVars) => Promise<CartResponse>,
+  scope: () => Scope,
+) {
+  return {
+    mutationFn,
+    retry: 0,
+    onMutate: (): CartMutationContext => ({ scope: scope() }),
+    onSuccess: (_data: CartResponse, _vars: TVars, context: CartMutationContext) =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: queryKeys.cart(context.scope) }),
+        client.invalidateQueries({ queryKey: [...context.scope, 'quote'] }),
+      ]),
+  }
+}
+
+export const updateCartItemMutation = (
+  client: QueryClient,
+  scope: () => Scope = currentCartScope,
+) =>
+  scopedCartMutation(
+    client,
+    ({ nftId, editionId, quantity }: CartItemRef & UpdateCartItemRequest) =>
+      updateCartItem(nftId, editionId, { quantity }),
+    scope,
+  )
+
+export const removeCartItemMutation = (
+  client: QueryClient,
+  scope: () => Scope = currentCartScope,
+) =>
+  scopedCartMutation(
+    client,
+    ({ nftId, editionId }: CartItemRef) => removeCartItem(nftId, editionId),
+    scope,
+  )
+
+export const setCouponMutation = (client: QueryClient, scope: () => Scope = currentCartScope) =>
+  scopedCartMutation(client, (body: CouponRequest) => setCoupon(body), scope)
+
+export const clearCouponMutation = (client: QueryClient, scope: () => Scope = currentCartScope) =>
+  scopedCartMutation(client, () => clearCoupon(), scope)
+
+export const useUpdateCartItem = () => useMutation(updateCartItemMutation(useQueryClient()))
+export const useRemoveCartItem = () => useMutation(removeCartItemMutation(useQueryClient()))
+export const useSetCoupon = () => useMutation(setCouponMutation(useQueryClient()))
+export const useClearCoupon = () => useMutation(clearCouponMutation(useQueryClient()))

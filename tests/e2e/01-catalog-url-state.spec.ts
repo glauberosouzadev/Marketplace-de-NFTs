@@ -35,7 +35,10 @@ const updating = (page: Page) => catalog(page).getByRole('status')
 
 /** Preço decimal ("1.19 ETH") em unidades de 1e-18, sem `number`/`parseFloat`. */
 function toUnits(text: string): bigint {
-  const [whole = '0', fraction = ''] = text.replace(/\s*ETH$/, '').trim().split('.')
+  const [whole = '0', fraction = ''] = text
+    .replace(/\s*ETH$/, '')
+    .trim()
+    .split('.')
   return BigInt(whole) * 10n ** 18n + BigInt(fraction.padEnd(18, '0'))
 }
 
@@ -62,7 +65,9 @@ async function openFilters(page: Page): Promise<void> {
 
 /** Escopo dos filtros: sidebar no desktop, drawer no mobile. */
 const filtersScope = (page: Page) =>
-  isDesktop(page) ? page.getByRole('complementary', { name: 'Filtros' }) : page.getByRole('dialog', { name: 'Filtros' })
+  isDesktop(page)
+    ? page.getByRole('complementary', { name: 'Filtros' })
+    : page.getByRole('dialog', { name: 'Filtros' })
 
 interface FilterChoice {
   collection?: string
@@ -122,13 +127,21 @@ async function loadCatalog(page: Page, path = '/', scenario?: string): Promise<v
 }
 
 test.describe('@main E2E-01 catálogo com estado na URL', () => {
-  test('carga default mostra a primeira página, ordenada por recentes, sem filtros na URL', async ({ page }) => {
+  test('carga default mostra a primeira página, ordenada por recentes, sem filtros na URL', async ({
+    page,
+  }) => {
     await loadCatalog(page)
 
     await expect(cardNames(page)).toHaveCount(PAGE_SIZE)
-    await expect(page.getByRole('tab', { name: 'Todos os NFTs' })).toHaveAttribute('aria-selected', 'true')
+    await expect(page.getByRole('tab', { name: 'Todos os NFTs' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
     await expect(sortBox(page)).toHaveText('Listados recentemente')
-    await expect(page.getByRole('button', { name: 'Página 1' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('button', { name: 'Página 1' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
     const params = search(page)
     expect(params.get('q')).toBeNull()
     expect(listParam(params, 'collection')).toEqual([])
@@ -149,10 +162,15 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
     for (const name of names) expect(name).toContain('Golden')
   })
 
-  test('aba, coleção, rede e preço combinados geram uma consulta e voltam à página 1', async ({ page }) => {
+  test('aba, coleção, rede e preço combinados geram uma consulta e voltam à página 1', async ({
+    page,
+  }) => {
     const requests = trackListRequests(page)
     await loadCatalog(page, '/?page=2')
-    await expect(page.getByRole('button', { name: 'Página 2' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('button', { name: 'Página 2' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
 
     await page.getByRole('tab', { name: 'Novos lançamentos' }).click()
     await expect.poll(() => search(page).get('tab')).toBe('new')
@@ -179,7 +197,9 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
     if (!isDesktop(page)) expect(requests.length - before).toBe(1)
   })
 
-  test('combinação vazia mostra "Nenhum NFT encontrado" e "Limpar filtros" restaura o catálogo', async ({ page }) => {
+  test('combinação vazia mostra "Nenhum NFT encontrado" e "Limpar filtros" restaura o catálogo', async ({
+    page,
+  }) => {
     await loadCatalog(page)
 
     await chooseFilters(page, { collection: 'Utilidade', network: 'Solana' })
@@ -197,7 +217,9 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
     expect(listParam(search(page), 'network')).toEqual([])
   })
 
-  test('ordenação por preço crescente e decrescente segue a resposta; recentes volta à ordem original', async ({ page }) => {
+  test('ordenação por preço crescente e decrescente segue a resposta; recentes volta à ordem original', async ({
+    page,
+  }) => {
     await loadCatalog(page)
     const recentNames = await cardNames(page).allTextContents()
 
@@ -228,14 +250,20 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
 
     await page.getByRole('button', { name: 'Página 2' }).click()
     await expect.poll(() => search(page).get('page')).toBe('2')
-    await expect(page.getByRole('button', { name: 'Página 2' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('button', { name: 'Página 2' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
     await expect.poll(async () => (await cardNames(page).allTextContents())[0]).not.toBe(first[0])
     const second = await cardNames(page).allTextContents()
     expect(second.filter((name) => first.includes(name))).toEqual([])
 
     await page.getByRole('button', { name: 'Página 3' }).click()
     await expect.poll(() => search(page).get('page')).toBe('3')
-    await expect(page.getByRole('button', { name: 'Página 3' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('button', { name: 'Página 3' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
     await expect.poll(async () => (await cardNames(page).allTextContents())[0]).not.toBe(second[0])
     const third = await cardNames(page).allTextContents()
     expect(third.filter((name) => [...first, ...second].includes(name))).toEqual([])
@@ -249,12 +277,16 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
     await sortBy(page, 'Preço crescente')
     await expect.poll(() => search(page).get('sort')).toBe('price_asc')
     await expect(updating(page)).toHaveText('')
-    await expect.poll(async () => (await cardNames(page).allTextContents())[0]).not.toBe(recentNames[0])
+    await expect
+      .poll(async () => (await cardNames(page).allTextContents())[0])
+      .not.toBe(recentNames[0])
     const sortedNames = await cardNames(page).allTextContents()
 
     await page.getByRole('button', { name: 'Página 2' }).click()
     await expect.poll(() => search(page).get('page')).toBe('2')
-    await expect.poll(async () => (await cardNames(page).allTextContents())[0]).not.toBe(sortedNames[0])
+    await expect
+      .poll(async () => (await cardNames(page).allTextContents())[0])
+      .not.toBe(sortedNames[0])
     const pageTwoNames = await cardNames(page).allTextContents()
 
     await page.goBack()
@@ -278,7 +310,10 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
     await page.reload()
 
     expect(page.url()).toBe(url)
-    await expect(page.getByRole('button', { name: 'Página 2' })).toHaveAttribute('aria-current', 'page')
+    await expect(page.getByRole('button', { name: 'Página 2' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
     await expect.poll(async () => cardNames(page).allTextContents()).toEqual(pageTwoNames)
     expect(search(page).get('sort')).toBe('price_asc')
   })
@@ -318,12 +353,20 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
       const w = window as unknown as { __orders: string[][] }
       w.__orders = []
       const read = () =>
-        Array.from(document.querySelectorAll('section[aria-label="Catálogo de NFTs"] a:has(h2)'), (a) =>
-          /(\d+(?:\.\d+)?) ETH/.exec((a.textContent ?? '').replace(a.querySelector('h2')?.textContent ?? '', ''))?.[1] ?? '',
+        Array.from(
+          document.querySelectorAll('section[aria-label="Catálogo de NFTs"] a:has(h2)'),
+          (a) =>
+            /(\d+(?:\.\d+)?) ETH/.exec(
+              (a.textContent ?? '').replace(a.querySelector('h2')?.textContent ?? '', ''),
+            )?.[1] ?? '',
         )
       const record = () => w.__orders.push(read())
       record()
-      new MutationObserver(record).observe(document.body, { childList: true, subtree: true, characterData: true })
+      new MutationObserver(record).observe(document.body, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      })
     })
 
     await expect(updating(page)).toHaveText('', { timeout: 15_000 })
@@ -336,10 +379,16 @@ test.describe('@main E2E-01 catálogo com estado na URL', () => {
     const sorts = requests.map((request) => new URL(request.url()).searchParams.get('sort'))
     expect(sorts.slice(-2)).toEqual(['price_asc', 'price_desc'])
     expect(await requests[requests.length - 1]!.failure()).toBeNull()
-    const orders = await page.evaluate(() => (window as unknown as { __orders: string[][] }).__orders)
+    const orders = await page.evaluate(
+      () => (window as unknown as { __orders: string[][] }).__orders,
+    )
     const showedAscending = orders.some((order) => {
       const units = order.filter(Boolean).map(toUnits)
-      return units.length > 1 && units[0]! < units[units.length - 1]! && units.slice(1).every((v, i) => v >= units[i]!)
+      return (
+        units.length > 1 &&
+        units[0]! < units[units.length - 1]! &&
+        units.slice(1).every((v, i) => v >= units[i]!)
+      )
     })
     expect(showedAscending).toBe(false)
     // Estável: depois de assentar, a ordem continua a da consulta vigente.

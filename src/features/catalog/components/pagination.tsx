@@ -25,7 +25,7 @@ export function Pagination({ page, totalPages, onChange }: PaginationProps) {
       </button>
       {pageWindow(page, totalPages).map((p, i) =>
         p === null ? (
-          <span key={`gap-${i}`} aria-hidden className="px-1 text-muted-foreground">
+          <span key={`gap-${i}`} aria-hidden className="text-muted-foreground px-1">
             …
           </span>
         ) : (
@@ -35,7 +35,7 @@ export function Pagination({ page, totalPages, onChange }: PaginationProps) {
             aria-label={`Página ${p}`}
             aria-current={p === page ? 'page' : undefined}
             onClick={() => onChange(p)}
-            className={`${base} ${p === page ? 'bg-primary font-bold text-primary-foreground' : 'bg-card'}`}
+            className={`${base} ${p === page ? 'bg-primary text-primary-foreground font-bold' : 'bg-card'}`}
           >
             {p}
           </button>

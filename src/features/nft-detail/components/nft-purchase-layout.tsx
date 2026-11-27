@@ -1,10 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import type { Nft } from '@/contracts'
 import { useAddToCart } from '@/features/cart/mutations'
 import { errorMessage } from '@/http/error-messages'
-import { isApiError } from '@/http/normalize-error'
+import { isApiError, isSessionExpired } from '@/http/normalize-error'
 import { noticeBus } from '@/realtime/notices'
-import { adjustedMessage, fitToLimit, parseQuantity, resolveEdition } from '../quantity'
+import { adjustedMessage, fitToLimit, parseQuantity, resolveEdition } from '@/lib/quantity'
 import { EditionPicker } from './edition-picker'
 import { NftGallery } from './nft-gallery'
 import { NftInfo } from './nft-info'
@@ -30,6 +31,7 @@ interface NftPurchaseLayoutProps {
 export function NftPurchaseLayout({ nft, editionId, onEditionChange }: NftPurchaseLayoutProps) {
   const [draft, setDraft] = useState('1')
   const addToCart = useAddToCart()
+  const navigate = useNavigate()
   const edition = resolveEdition(nft.editions, editionId)
   const max = edition?.available ?? 0
   const parsed = parseQuantity(draft, max)
@@ -47,18 +49,22 @@ export function NftPurchaseLayout({ nft, editionId, onEditionChange }: NftPurcha
     onEditionChange(id)
   }
 
-  const add = (): void => {
+  const add = (openCart: boolean): void => {
     if (!edition || !parsed.ok) return
     const quantity = parsed.value
     addToCart.mutate(
       { nftId: nft.id, editionId: edition.id, quantity },
       {
-        onSuccess: () =>
+        onSuccess: () => {
+          if (openCart) return void navigate({ to: '/carrinho' })
           announce(
             `Adicionado ao carrinho: ${nft.name}, edição ${edition.label}, quantidade ${quantity}.`,
             'polite',
-          ),
-        onError: (error) => announce(failureText(error), 'assertive'),
+          )
+        },
+        onError: (error) => {
+          if (!isSessionExpired(error)) announce(failureText(error), 'assertive')
+        },
       },
     )
   }
@@ -82,7 +88,8 @@ export function NftPurchaseLayout({ nft, editionId, onEditionChange }: NftPurcha
           canAdd={Boolean(edition) && parsed.ok}
           pending={addToCart.isPending}
           onDraftChange={setDraft}
-          onAdd={add}
+          onAdd={() => add(false)}
+          onBuy={() => add(true)}
         />
       </div>
     </div>

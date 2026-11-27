@@ -42,6 +42,19 @@ export function connectPersistedRealtime(): void {
   connectRealtime(getSession()?.token ?? null)
 }
 
+/**
+ * Troca de escopo (SDD-07): remove os handlers do socket anterior antes de desconectar,
+ * para nenhum evento da sessão encerrada chegar, e recria com a sessão persistida atual.
+ */
+export function restartRealtime(): void {
+  socket?.removeAllListeners()
+  socket?.disconnect()
+  socket = null
+  currentToken = null
+  connectionStatus.set('idle')
+  connectPersistedRealtime()
+}
+
 export function onRealtimeEvent(listener: EventListener): () => void {
   listeners.add(listener)
   return () => listeners.delete(listener)

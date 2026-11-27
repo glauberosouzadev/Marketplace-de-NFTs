@@ -12,7 +12,10 @@ export function SortSelect() {
   return (
     <div className="flex items-center gap-2 text-sm">
       <span id="sort-label">Ordenar por:</span>
-      <Select value={search.sort} onValueChange={(sort) => update({ sort: sort as typeof search.sort })}>
+      <Select
+        value={search.sort}
+        onValueChange={(sort) => update({ sort: sort as typeof search.sort })}
+      >
         <SelectTrigger aria-labelledby="sort-label" className="w-[220px] lg:w-[240px]">
           <SelectValue />
         </SelectTrigger>

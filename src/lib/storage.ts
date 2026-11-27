@@ -9,7 +9,9 @@ const KEYS = {
   session: 'kurio:session',
 } as const
 
-const checkoutKey = (uid: string): string => `kurio:u:${uid}:checkout`
+const USER_PREFIX = 'kurio:u:'
+const userPrefix = (uid: string): string => `${USER_PREFIX}${uid}:`
+const checkoutKey = (uid: string): string => `${userPrefix(uid)}checkout`
 
 function read(key: string): string | null {
   try {
@@ -35,12 +37,30 @@ function remove(key: string): void {
   }
 }
 
+function keysMatching(match: (key: string) => boolean): string[] {
+  try {
+    const keys: string[] = []
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i)
+      if (key !== null && match(key)) keys.push(key)
+    }
+    return keys
+  } catch {
+    return []
+  }
+}
+
 export function getGuestCartId(): string {
   const existing = read(KEYS.guestCartId)
   if (existing) return existing
   const id = crypto.randomUUID()
   write(KEYS.guestCartId, id)
   return id
+}
+
+/** Após o merge no login/cadastro; o próximo visitante ganha novo id sob demanda. */
+export function clearGuestCartId(): void {
+  remove(KEYS.guestCartId)
 }
 
 export function getSession(): StoredSession | null {
@@ -75,4 +95,18 @@ export function setCheckoutDraft(uid: string, value: string): void {
 
 export function clearCheckoutDraft(uid: string): void {
   remove(checkoutKey(uid))
+}
+
+/** Logout/troca de usuário (SDD-07): sessão e todo `kurio:u:<uid>:*`. */
+export function clearUserStorage(uid: string | null): void {
+  clearSession()
+  if (uid === null) return
+  const prefix = userPrefix(uid)
+  keysMatching((key) => key.startsWith(prefix)).forEach(remove)
+}
+
+/** No login: descarta o contexto de outros usuários (ex.: deixado por uma expiração). */
+export function clearOtherUsersStorage(uid: string): void {
+  const own = userPrefix(uid)
+  keysMatching((key) => key.startsWith(USER_PREFIX) && !key.startsWith(own)).forEach(remove)
 }

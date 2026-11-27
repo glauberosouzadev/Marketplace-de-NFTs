@@ -75,7 +75,7 @@ export function SearchField({ placeholder, className, focusOnMount, onEscape }: 
     <div role="search" className={cn('relative', className)}>
       <Search
         aria-hidden
-        className="pointer-events-none absolute left-3 top-1/2 size-5 -translate-y-1/2 text-primary"
+        className="text-primary pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2"
       />
       <Input
         type="search"

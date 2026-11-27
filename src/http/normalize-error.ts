@@ -34,6 +34,10 @@ export function isApiError(value: unknown): value is ApiError {
   )
 }
 
+/** A expiração já tem aviso global (interceptor 401); quem trata o erro localmente não o repete. */
+export const isSessionExpired = (value: unknown): boolean =>
+  isApiError(value) && value.code === 'SESSION_EXPIRED'
+
 function transient(kind: ApiError['kind'], status?: number): ApiError {
   const code: ErrorCode = 'TRANSIENT'
   const base: ApiError = { kind, code, message: errorMessage(code) }

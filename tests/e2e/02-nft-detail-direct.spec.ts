@@ -61,7 +61,9 @@ test.describe('@main E2E-02 detalhe por acesso direto', () => {
 
     await expect(qty).toHaveValue('3')
     await expect(plus).toHaveAttribute('aria-disabled', 'true')
-    await expect(page.getByText('Limite atingido: máximo de 3 unidades nesta edição.')).toBeVisible()
+    await expect(
+      page.getByText('Limite atingido: máximo de 3 unidades nesta edição.'),
+    ).toBeVisible()
 
     await plus.click({ force: true })
     await expect(qty).toHaveValue('3')

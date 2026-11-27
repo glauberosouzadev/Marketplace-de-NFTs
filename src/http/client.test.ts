@@ -1,7 +1,7 @@
 import type { AxiosAdapter, InternalAxiosRequestConfig } from 'axios'
 import { AxiosError } from 'axios'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { http, request } from './client'
+import { http, request, setSessionExpiredHandler } from './client'
 
 const store = new Map<string, string>()
 let seen: InternalAxiosRequestConfig | undefined
@@ -28,7 +28,10 @@ beforeEach(() => {
     },
   })
 })
-afterEach(() => vi.useRealTimers())
+afterEach(() => {
+  vi.useRealTimers()
+  setSessionExpiredHandler(null)
+})
 
 describe('cabeçalhos', () => {
   it('sem sessão envia X-Guest-Cart-Id só em /cart e /quotes', async () => {
@@ -107,5 +110,57 @@ describe('erros', () => {
     const p = request({ url: '/x', signal: ctrl.signal })
     ctrl.abort()
     await expect(p).rejects.toMatchObject({ kind: 'canceled' })
+  })
+})
+
+describe('401 SESSION_EXPIRED', () => {
+  const rejectWith = (status: number, code: string) => (c: InternalAxiosRequestConfig) =>
+    Promise.reject(
+      new AxiosError('x', 'ERR_BAD_REQUEST', c, null, {
+        data: { code, message: 'm' },
+        status,
+        statusText: '',
+        headers: {},
+        config: c,
+      }),
+    )
+  const withSession = () => store.set('kurio:session', JSON.stringify({ token: 't1', uid: 'u1' }))
+
+  it('aciona o tratamento e ainda rejeita com o ApiError', async () => {
+    withSession()
+    const handler = vi.fn()
+    setSessionExpiredHandler(handler)
+    useAdapter(rejectWith(401, 'SESSION_EXPIRED'))
+    await expect(request({ url: '/cart' })).rejects.toMatchObject({ code: 'SESSION_EXPIRED' })
+    expect(handler).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(['/auth/login', '/auth/register', '/auth/logout'])('ignora 401 de %s', async (url) => {
+    withSession()
+    const handler = vi.fn()
+    setSessionExpiredHandler(handler)
+    useAdapter(rejectWith(401, 'SESSION_EXPIRED'))
+    await request({ method: 'POST', url }).catch(() => undefined)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('ignora outros 401 e pedidos sem sessão', async () => {
+    const handler = vi.fn()
+    setSessionExpiredHandler(handler)
+    useAdapter(rejectWith(401, 'SESSION_EXPIRED'))
+    await request({ url: '/cart' }).catch(() => undefined)
+    withSession()
+    useAdapter(rejectWith(401, 'UNAUTHENTICATED'))
+    await request({ url: '/cart' }).catch(() => undefined)
+    expect(handler).not.toHaveBeenCalled()
+  })
+
+  it('dois 401 simultâneos acionam uma única vez quando o tratamento encerra a sessão', async () => {
+    withSession()
+    const handler = vi.fn(() => void store.delete('kurio:session'))
+    setSessionExpiredHandler(handler)
+    useAdapter(rejectWith(401, 'SESSION_EXPIRED'))
+    await Promise.allSettled([request({ url: '/cart' }), request({ url: '/favorites' })])
+    expect(handler).toHaveBeenCalledTimes(1)
   })
 })

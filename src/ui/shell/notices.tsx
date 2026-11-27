@@ -7,7 +7,7 @@ function NoticeList({ items, role }: { items: readonly Notice[]; role: 'status' 
       {items.map((n) => (
         <div
           key={n.id}
-          className="pointer-events-auto flex items-center justify-between gap-3 rounded-md border bg-background px-4 py-3 text-sm shadow-md"
+          className="bg-background pointer-events-auto flex items-center justify-between gap-3 rounded-md border px-4 py-3 text-sm shadow-md"
         >
           <span>{n.text}</span>
           <button

@@ -16,8 +16,7 @@ export function resolveEdition(
 }
 
 export type QuantityResult =
-  | { ok: true; value: number }
-  | { ok: false; reason: 'invalid' | 'above-limit' }
+  { ok: true; value: number } | { ok: false; reason: 'invalid' | 'above-limit' }
 
 const INTEGER = /^\d+$/
 

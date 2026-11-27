@@ -7,7 +7,7 @@ import {
   parseQuantity,
   quantityErrorMessage,
   type QuantityResult,
-} from '../quantity'
+} from '@/lib/quantity'
 
 interface QuantityStepperProps {
   draft: string
@@ -39,7 +39,7 @@ export function QuantityStepper({ draft, max, disabled = false, onChange }: Quan
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-3">
-        <label htmlFor={inputId} className="text-sm text-muted-foreground">
+        <label htmlFor={inputId} className="text-muted-foreground text-sm">
           Qtd.
         </label>
         <button
@@ -62,7 +62,7 @@ export function QuantityStepper({ draft, max, disabled = false, onChange }: Quan
           aria-invalid={!parsed.ok && !disabled}
           aria-describedby={message ? messageId : undefined}
           onChange={(event) => onChange(event.target.value)}
-          className="w-8 rounded-sm bg-transparent text-center text-base font-bold outline-none focus-visible:ring-2 focus-visible:ring-ring aria-[invalid=true]:text-destructive"
+          className="focus-visible:ring-ring aria-[invalid=true]:text-destructive w-8 rounded-sm bg-transparent text-center text-base font-bold outline-none focus-visible:ring-2"
         />
         <button
           type="button"
@@ -79,7 +79,11 @@ export function QuantityStepper({ draft, max, disabled = false, onChange }: Quan
       <p
         id={messageId}
         role="status"
-        className={parsed.ok ? 'text-xs text-muted-foreground empty:hidden' : 'text-xs text-destructive empty:hidden'}
+        className={
+          parsed.ok
+            ? 'text-muted-foreground text-xs empty:hidden'
+            : 'text-destructive text-xs empty:hidden'
+        }
       >
         {message}
       </p>

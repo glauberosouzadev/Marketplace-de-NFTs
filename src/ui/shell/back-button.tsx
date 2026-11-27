@@ -9,7 +9,7 @@ export function BackButton() {
       type="button"
       aria-label="Voltar"
       onClick={() => router.history.back()}
-      className="grid size-10 place-items-center rounded-full bg-card text-primary outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+      className="bg-card text-primary focus-visible:ring-ring grid size-10 place-items-center rounded-full outline-none focus-visible:ring-2 lg:hidden"
     >
       <ChevronLeft aria-hidden className="size-5" />
     </button>

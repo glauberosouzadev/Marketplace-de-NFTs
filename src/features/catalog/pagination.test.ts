@@ -11,7 +11,8 @@ describe('clampPage', () => {
 describe('pageWindow', () => {
   it('mostra todas quando poucas', () => expect(pageWindow(2, 4)).toEqual([1, 2, 3, 4]))
   it('insere reticências', () => expect(pageWindow(5, 10)).toEqual([1, null, 4, 5, 6, null, 10]))
-  it('sem reticências quando contíguas', () => expect(pageWindow(2, 10)).toEqual([1, 2, 3, null, 10]))
+  it('sem reticências quando contíguas', () =>
+    expect(pageWindow(2, 10)).toEqual([1, 2, 3, null, 10]))
 })
 
 describe('shouldShowEmpty', () => {

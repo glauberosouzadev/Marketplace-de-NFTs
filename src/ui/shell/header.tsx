@@ -1,9 +1,13 @@
 import { useRef, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { LogIn, Search, ShoppingCart } from 'lucide-react'
+import { useSession } from '@/features/session/queries'
 import { SearchField } from '@/features/catalog/components/search-field'
 import { cn } from '@/lib/cn'
+import { CartBadge } from './cart-badge'
+import { loginSearch } from './login-search'
 import { OutOfScopeButton } from './out-of-scope'
+import { UserMenu } from './user-menu'
 
 const linkClass =
   'relative flex h-full items-center px-1 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring'
@@ -20,16 +24,18 @@ const linksAfterMarket = ['Criadores', 'Aprenda']
 export function Header() {
   const [searchOpen, setSearchOpen] = useState(false)
   const searchButton = useRef<HTMLButtonElement>(null)
+  const { data: user } = useSession()
+  const search = loginSearch(useRouterState({ select: (state) => state.location.href }))
   const closeSearch = () => {
     setSearchOpen(false)
     searchButton.current?.focus()
   }
   return (
     <header className="mx-auto hidden w-full max-w-[1200px] lg:block">
-      <div className="flex h-[68px] items-center justify-between border-b border-border-strong">
+      <div className="border-border-strong flex h-[68px] items-center justify-between border-b">
         <Link
           to="/"
-          className="text-xs font-bold tracking-[0.2em] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="focus-visible:ring-ring text-xs font-bold tracking-[0.2em] outline-none focus-visible:ring-2"
         >
           KURIO
         </Link>
@@ -66,20 +72,30 @@ export function Header() {
             aria-label="Buscar NFTs"
             aria-expanded={searchOpen}
             onClick={() => (searchOpen ? closeSearch() : setSearchOpen(true))}
-            className="grid size-10 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring grid size-10 place-items-center rounded-full outline-none focus-visible:ring-2"
           >
             <Search aria-hidden className="size-5" />
           </button>
-          <OutOfScopeButton
+          <Link
+            to="/carrinho"
             aria-label="Carrinho"
-            className="grid size-10 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="focus-visible:ring-ring relative grid size-10 place-items-center rounded-full outline-none focus-visible:ring-2"
           >
             <ShoppingCart aria-hidden className="size-5" />
-          </OutOfScopeButton>
-          <OutOfScopeButton className="flex h-[35px] items-center gap-2 rounded-md bg-primary px-3 text-sm font-bold text-primary-foreground outline-none hover:bg-price focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
-            <LogIn aria-hidden className="size-4" />
-            Entrar
-          </OutOfScopeButton>
+            <CartBadge />
+          </Link>
+          {user ? (
+            <UserMenu user={user} />
+          ) : (
+            <Link
+              to="/login"
+              search={search}
+              className="bg-primary text-primary-foreground hover:bg-price focus-visible:ring-ring focus-visible:ring-offset-background flex h-[35px] items-center gap-2 rounded-md px-3 text-sm font-bold outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            >
+              <LogIn aria-hidden className="size-4" />
+              Entrar
+            </Link>
+          )}
         </div>
       </div>
     </header>

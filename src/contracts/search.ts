@@ -8,11 +8,7 @@ const DECIMAL = /^\d+(\.\d{1,18})?$/
 const list = <T extends z.ZodType>(item: T) =>
   z.preprocess((v) => (v === undefined ? [] : Array.isArray(v) ? v : [v]), z.array(item)).catch([])
 
-const decimal = z
-  .string()
-  .regex(DECIMAL)
-  .optional()
-  .catch(undefined)
+const decimal = z.string().regex(DECIMAL).optional().catch(undefined)
 
 export const catalogSearchSchema = z.object({
   q: z.string().trim().max(100).catch(''),
@@ -53,4 +49,27 @@ export function patchSearch(current: CatalogSearch, patch: Partial<CatalogSearch
     (k) => k !== 'page' && !sameValue(current[k], next[k]),
   )
   return filtersChanged ? { ...next, page: 1 } : next
+}
+
+// Controle e espaço são removidos pelo parser de URL do navegador: `/\t/evil.com` vira `//evil.com`.
+const INTERNAL_PATH = /^\/(?![/\\])[^\s\p{Cc}]*$/u
+
+/** `redirect` só aceita caminho relativo interno (SDD-03); o resto cai em `/`, evitando open redirect. */
+export function safeRedirect(value: unknown): string {
+  return typeof value === 'string' && INTERNAL_PATH.test(value) ? value : '/'
+}
+
+export const authSearchSchema = z.object({
+  redirect: z.string().optional().catch(undefined).transform(safeRedirect),
+  reason: z.enum(['expired']).optional().catch(undefined),
+})
+
+export type AuthSearch = z.infer<typeof authSearchSchema>
+
+export function loginHref(redirect: string, reason?: AuthSearch['reason']): string {
+  const params = new URLSearchParams({
+    redirect: safeRedirect(redirect),
+    ...(reason ? { reason } : {}),
+  })
+  return `/login?${params.toString()}`
 }

@@ -1,4 +1,4 @@
-import type { KurioEvent, Order, OrderStatus } from '@/contracts'
+import type { Cart, KurioEvent, Order, OrderStatus } from '@/contracts'
 import { clearPersisted } from './db/persist'
 import { getDb, mutateDb, nextVersion } from './db/store'
 import {
@@ -25,6 +25,7 @@ export interface MockControl {
   settleOrder(orderId: string, status: Exclude<OrderStatus, 'pending'>): void
   expireSession(): void
   listOrders(): Order[]
+  listCarts(): Cart[]
 }
 
 function setScenario(id: string): void {
@@ -86,6 +87,7 @@ export function installMockControl(): void {
     settleOrder,
     expireSession,
     listOrders: () => structuredClone(getDb().orders),
+    listCarts: () => structuredClone(getDb().carts),
   }
   Object.assign(window, { __kurioMock: control })
 }
