@@ -9,10 +9,15 @@ interface HeroProps {
 export function Hero({ nft, onExplore }: HeroProps) {
   const image = nft?.images[0]
   return (
-    <section aria-label="Destaque" className="mb-12 flex h-[450px] items-center justify-between gap-6">
+    <section
+      aria-label="Destaque"
+      className="mb-12 flex h-[450px] items-center justify-between gap-6"
+    >
       <div className="max-w-[420px] px-6">
         <p className="text-sm">Bem-vindo à Kurio</p>
-        <h1 className="mt-4 text-[40px] leading-[70px] font-bold uppercase">SEJA DONO DA ARTE DIGITAL</h1>
+        <h1 className="mt-4 text-[40px] leading-[70px] font-bold uppercase">
+          SEJA DONO DA ARTE DIGITAL
+        </h1>
         <p className="text-muted-foreground mt-4 text-sm leading-6">
           Descubra NFTs selecionados de criadores do mundo todo, arte digital verificada.
         </p>

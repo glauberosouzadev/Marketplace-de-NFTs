@@ -1,4 +1,5 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
+import type { QueryClient } from '@tanstack/react-query'
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router'
 import { Footer } from '@/ui/shell/footer'
 import { Header } from '@/ui/shell/header'
 import { NotFound } from '@/ui/shell/not-found'
@@ -17,4 +18,7 @@ function Root() {
   )
 }
 
-export const Route = createRootRoute({ component: Root, notFoundComponent: NotFound })
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  component: Root,
+  notFoundComponent: NotFound,
+})

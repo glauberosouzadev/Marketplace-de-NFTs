@@ -35,7 +35,7 @@ export function NftGallery({ images }: { images: readonly NftImage[] }) {
                 aria-label={`Ver imagem ${index + 1} de ${images.length}`}
                 aria-pressed={index === selected}
                 className={cn(
-                  'block overflow-hidden rounded-lg border-2 outline-none focus-visible:ring-2 focus-visible:ring-ring lg:rounded-md',
+                  'focus-visible:ring-ring block overflow-hidden rounded-lg border-2 outline-none focus-visible:ring-2 lg:rounded-md',
                   index === selected ? 'border-primary' : 'border-transparent',
                 )}
               >

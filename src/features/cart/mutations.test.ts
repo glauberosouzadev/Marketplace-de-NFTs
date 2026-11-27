@@ -7,7 +7,13 @@ import type { ApiError, Cart } from '@/contracts'
 const request = vi.fn<(c: unknown) => Promise<unknown>>()
 vi.mock('@/http/client', () => ({ request: (c: unknown) => request(c) }))
 
-import { addToCartMutation } from './mutations'
+import {
+  addToCartMutation,
+  clearCouponMutation,
+  removeCartItemMutation,
+  setCouponMutation,
+  updateCartItemMutation,
+} from './mutations'
 
 const scope: Scope = ['guest', 'g-1']
 const body = { nftId: 'n1', editionId: 'e1', quantity: 2 }
@@ -22,7 +28,10 @@ const conflict: ApiError = {
 function setup() {
   const client = createQueryClient()
   client.setQueryData(queryKeys.cart(scope), cart)
-  const observer = new MutationObserver(client, addToCartMutation(client, () => scope))
+  const observer = new MutationObserver(
+    client,
+    addToCartMutation(client, () => scope),
+  )
   return { client, observer }
 }
 
@@ -48,7 +57,10 @@ describe('useAddToCart (addToCartMutation)', () => {
     const client = createQueryClient()
     client.setQueryData(queryKeys.cart(scope), cart)
     client.setQueryData(queryKeys.cart(userScope), cart)
-    const observer = new MutationObserver(client, addToCartMutation(client, () => current))
+    const observer = new MutationObserver(
+      client,
+      addToCartMutation(client, () => current),
+    )
     const pending = observer.mutate(body)
     await vi.waitFor(() => expect(request).toHaveBeenCalledTimes(1))
     current = userScope
@@ -65,5 +77,57 @@ describe('useAddToCart (addToCartMutation)', () => {
     expect(request).toHaveBeenCalledTimes(1)
     expect(client.getQueryData(queryKeys.cart(scope))).toBe(cart)
     expect(client.getQueryState(queryKeys.cart(scope))?.isInvalidated).toBe(false)
+  })
+})
+
+describe('mutations de item e cupom', () => {
+  const quoteKey = queryKeys.quote(scope, 1, null, 'ethereum')
+  const cases = [
+    ['updateCartItem', updateCartItemMutation, { nftId: 'n1', editionId: 'e1', quantity: 3 }],
+    ['removeCartItem', removeCartItemMutation, { nftId: 'n1', editionId: 'e1' }],
+    ['setCoupon', setCouponMutation, { code: 'KURIO10' }],
+    ['clearCoupon', clearCouponMutation, undefined],
+  ] as const
+
+  it.each(cases)(
+    '%s invalida carrinho e cotação do escopo capturado',
+    async (_n, factory, vars) => {
+      const userScope: Scope = ['user', 'u-1']
+      request.mockResolvedValue({ ...cart, version: 2 })
+      const client = createQueryClient()
+      client.setQueryData(queryKeys.cart(scope), cart)
+      client.setQueryData(quoteKey, {})
+      client.setQueryData(queryKeys.cart(userScope), cart)
+      client.setQueryData(queryKeys.quote(userScope, 1, null, 'ethereum'), {})
+      const observer = new MutationObserver(client, factory(client, () => scope) as never)
+      await observer.mutate(vars as never)
+      expect(client.getQueryState(queryKeys.cart(scope))?.isInvalidated).toBe(true)
+      expect(client.getQueryState(quoteKey)?.isInvalidated).toBe(true)
+      expect(client.getQueryState(queryKeys.cart(userScope))?.isInvalidated).toBe(false)
+      expect(
+        client.getQueryState(queryKeys.quote(userScope, 1, null, 'ethereum'))?.isInvalidated,
+      ).toBe(false)
+    },
+  )
+
+  it('422 de cupom chega com fieldErrors.code e o carrinho não muda', async () => {
+    const invalid: ApiError = {
+      kind: 'http',
+      status: 422,
+      code: 'VALIDATION',
+      message: 'cupom inválido',
+      fieldErrors: { code: 'Cupom inválido' },
+    }
+    request.mockRejectedValue(invalid)
+    const { client } = setup()
+    const observer = new MutationObserver(
+      client,
+      setCouponMutation(client, () => scope),
+    )
+    await expect(observer.mutate({ code: 'X' })).rejects.toMatchObject({
+      fieldErrors: { code: 'Cupom inválido' },
+    })
+    expect(request).toHaveBeenCalledTimes(1)
+    expect(client.getQueryData(queryKeys.cart(scope))).toBe(cart)
   })
 })

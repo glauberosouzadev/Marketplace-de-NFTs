@@ -4,17 +4,33 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-const mocksPattern = { group: ['@/mocks', '@/mocks/*', '**/mocks', '**/mocks/**'], message: 'So main.tsx importa @/mocks (TSD-02).' }
+const mocksPattern = {
+  group: ['@/mocks', '@/mocks/*', '**/mocks', '**/mocks/**'],
+  message: 'So main.tsx importa @/mocks (TSD-02).',
+}
 const bannedClients = ['axios', 'socket.io-client'].map((name) => ({
   name,
   message: 'Use os hooks de dominio, @/http ou @/realtime (TSD-02).',
 }))
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'public', 'src/routeTree.gen.ts', 'playwright-report', 'test-results'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'public',
+      'src/routeTree.gen.ts',
+      'playwright-report',
+      'test-results',
+    ],
+  },
   {
     files: ['**/*.{ts,tsx}'],
-    extends: [js.configs.recommended, ...tseslint.configs.recommended, jsxA11y.flatConfigs.recommended],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommended,
+      jsxA11y.flatConfigs.recommended,
+    ],
     languageOptions: { ecmaVersion: 2022, globals: globals.browser },
     plugins: { 'react-hooks': reactHooks },
     rules: {

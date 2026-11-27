@@ -9,9 +9,7 @@ export function NftInfo({ nft, children }: { nft: Nft; children?: ReactNode }) {
     <div className="flex flex-col gap-4">
       <div className="flex items-start justify-between gap-3">
         <h1 className="text-lg font-bold">{nft.name}</h1>
-        <p
-          className="flex shrink-0 items-center gap-1 rounded-full border border-primary px-3 py-1 text-sm font-bold text-price"
-        >
+        <p className="border-primary text-price flex shrink-0 items-center gap-1 rounded-full border px-3 py-1 text-sm font-bold">
           <span className="sr-only">
             Avaliação {nft.rating.score.toFixed(1)} de 5, {nft.rating.count} avaliações
           </span>
@@ -22,9 +20,9 @@ export function NftInfo({ nft, children }: { nft: Nft; children?: ReactNode }) {
           </span>
         </p>
       </div>
-      <p className="text-sm text-foreground">{nft.description}</p>
+      <p className="text-foreground text-sm">{nft.description}</p>
       {children}
-      <dl className="flex flex-col gap-3 text-sm text-muted-foreground">
+      <dl className="text-muted-foreground flex flex-col gap-3 text-sm">
         <div>
           <dt className="inline">ID do token: </dt>
           <dd className="inline">#{nft.tokenId}</dd>

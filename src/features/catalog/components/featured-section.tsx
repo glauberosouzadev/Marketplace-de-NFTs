@@ -1,5 +1,5 @@
 import { useFeatured } from '../queries'
-import { useMediaQuery } from '../use-media-query'
+import { useMediaQuery } from '@/lib/use-media-query'
 import { FeaturedCarousel } from './featured-carousel'
 import { Hero } from './hero'
 import { HeroSkeleton } from './hero-skeleton'
@@ -11,7 +11,10 @@ export function FeaturedSection({ onExplore }: { onExplore: () => void }) {
   if (isPending) return <HeroSkeleton desktop={desktop} />
   if (isError || !data) {
     return (
-      <div role="alert" className="mb-6 flex h-[240px] items-center justify-center gap-3 text-sm lg:mb-12 lg:h-[450px]">
+      <div
+        role="alert"
+        className="mb-6 flex h-[240px] items-center justify-center gap-3 text-sm lg:mb-12 lg:h-[450px]"
+      >
         <span className="text-muted-foreground">Não foi possível carregar os destaques.</span>
         <button
           type="button"

@@ -1,6 +1,6 @@
 import { AxiosError, CanceledError } from 'axios'
 import { describe, expect, it } from 'vitest'
-import { normalizeError } from './normalize-error'
+import { isSessionExpired, normalizeError } from './normalize-error'
 
 const withResponse = (status: number, data: unknown): AxiosError =>
   new AxiosError('x', undefined, undefined, undefined, {
@@ -50,5 +50,20 @@ describe('normalizeError', () => {
   })
   it('cancelamento', () => {
     expect(normalizeError(new CanceledError(), { timedOut: false }).kind).toBe('canceled')
+  })
+})
+
+describe('isSessionExpired', () => {
+  it('só o ApiError SESSION_EXPIRED tem aviso global', () => {
+    const expired = normalizeError(withResponse(401, { code: 'SESSION_EXPIRED', message: 'x' }), {
+      timedOut: false,
+    })
+    const unauthenticated = normalizeError(
+      withResponse(401, { code: 'UNAUTHENTICATED', message: 'x' }),
+      { timedOut: false },
+    )
+    expect(isSessionExpired(expired)).toBe(true)
+    expect(isSessionExpired(unauthenticated)).toBe(false)
+    expect(isSessionExpired(new Error('SESSION_EXPIRED'))).toBe(false)
   })
 })

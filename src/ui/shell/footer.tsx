@@ -58,7 +58,7 @@ function WalletBadges() {
   return (
     <p
       aria-label="Carteiras compatíveis: MetaMask, WalletConnect, Coinbase"
-      className="flex w-fit items-center gap-3 rounded-md border border-border bg-surface-strong px-3 py-1 text-[9px] font-bold text-price"
+      className="border-border bg-surface-strong text-price flex w-fit items-center gap-3 rounded-md border px-3 py-1 text-[9px] font-bold"
     >
       {wallets.map((w, i) => (
         <span key={w} aria-hidden className="flex items-center gap-3">
@@ -77,15 +77,15 @@ export function Footer() {
       <div className="bg-card">
         <div className="grid grid-cols-4 px-12 py-8">
           {benefits.map((b) => (
-            <section key={b.letter} className="border-r border-primary pr-6 pl-6 first:pl-0">
+            <section key={b.letter} className="border-primary border-r pr-6 pl-6 first:pl-0">
               <span
                 aria-hidden
-                className="grid size-[74px] place-items-center rounded-full bg-primary text-2xl font-bold text-primary-foreground"
+                className="bg-primary text-primary-foreground grid size-[74px] place-items-center rounded-full text-2xl font-bold"
               >
                 {b.letter}
               </span>
               <h2 className="mt-4 text-base font-bold">{b.title}</h2>
-              <p className="mt-3 text-sm leading-[22px] text-price/80">{b.text}</p>
+              <p className="text-price/80 mt-3 text-sm leading-[22px]">{b.text}</p>
             </section>
           ))}
           <section aria-labelledby="newsletter-title" className="pl-6">
@@ -95,23 +95,23 @@ export function Footer() {
             <div className="mt-4 flex h-10">
               <OutOfScopeButton
                 aria-label="E-mail da newsletter"
-                className={`min-w-0 flex-1 truncate bg-surface-strong px-3 text-left text-xs text-price/70 ${focusClass}`}
+                className={`bg-surface-strong text-price/70 min-w-0 flex-1 truncate px-3 text-left text-xs ${focusClass}`}
               >
                 digite seu e-mail...
               </OutOfScopeButton>
               <OutOfScopeButton
-                className={`bg-primary px-4 text-lg font-bold text-primary-foreground hover:bg-price ${focusClass}`}
+                className={`bg-primary text-primary-foreground hover:bg-price px-4 text-lg font-bold ${focusClass}`}
               >
                 Enviar
               </OutOfScopeButton>
             </div>
-            <p className="mt-4 text-xs leading-[22px] text-price/80">
+            <p className="text-price/80 mt-4 text-xs leading-[22px]">
               Receba lançamentos selecionados, histórias de criadores e novidades do mercado.
             </p>
           </section>
         </div>
 
-        <div className="grid grid-cols-4 items-center bg-surface-strong px-8 py-6 text-sm">
+        <div className="bg-surface-strong grid grid-cols-4 items-center px-8 py-6 text-sm">
           <p className="text-xs font-bold tracking-[0.2em]">KURIO</p>
           <p>Feito para colecionadores, criadores e cultura</p>
           <p>contato@email.com</p>
@@ -136,7 +136,7 @@ export function Footer() {
                 <li key={s.label}>
                   <OutOfScopeButton
                     aria-label={s.label}
-                    className={`grid size-[30px] place-items-center rounded-sm border border-primary text-price ${focusClass}`}
+                    className={`border-primary text-price grid size-[30px] place-items-center rounded-sm border ${focusClass}`}
                   >
                     {s.icon}
                   </OutOfScopeButton>

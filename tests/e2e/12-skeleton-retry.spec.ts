@@ -2,7 +2,8 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import { gotoApp } from './support'
 
 const NFT_URL = '/nft/nft-001'
-const cardLinks = (page: Page) => page.getByRole('region', { name: 'Catálogo de NFTs' }).getByRole('link')
+const cardLinks = (page: Page) =>
+  page.getByRole('region', { name: 'Catálogo de NFTs' }).getByRole('link')
 
 // Retry do Query (1 s + 2 s) até o erro aparecer; o relógio real basta, sem esperas fixas.
 test.setTimeout(60_000)
@@ -23,7 +24,10 @@ test.describe('E2E-12 skeleton, falha e nova tentativa', () => {
     await expect(skeleton).toBeVisible()
     const before = await box(skeleton.getByRole('listitem').first())
 
-    const grid = page.getByRole('region', { name: 'Catálogo de NFTs' }).getByRole('list').filter({ has: page.getByRole('link') })
+    const grid = page
+      .getByRole('region', { name: 'Catálogo de NFTs' })
+      .getByRole('list')
+      .filter({ has: page.getByRole('link') })
     await expect(skeleton).toHaveCount(0)
     await expect(grid.getByRole('listitem').first()).toBeVisible()
     const after = await box(grid.getByRole('listitem').first())

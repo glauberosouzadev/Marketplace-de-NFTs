@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { toListQuery, type CatalogSearch } from '@/contracts'
 import { TabBar } from '@/ui/shell/tab-bar'
 import { CatalogEmpty } from './components/catalog-empty'
@@ -31,9 +31,8 @@ const CLEARED: Partial<CatalogSearch> = {
 }
 
 export function CatalogPage() {
-  const search = useSearch({ from: '/' })
-  const navigate = useNavigate({ from: '/' })
-  const { update } = useCatalogSearch()
+  const navigate = useNavigate()
+  const { search, update } = useCatalogSearch()
   const { data, isPending, isError, isFetching, refetch } = useNfts(toListQuery(search))
 
   const featured = useFeatured()
@@ -42,7 +41,7 @@ export function CatalogPage() {
   const corrected = data ? clampPage(search.page, data.totalPages) : null
   useEffect(() => {
     if (corrected !== null)
-      void navigate({ search: (prev) => ({ ...prev, page: corrected }), replace: true })
+      void navigate({ to: '/', search: (prev) => ({ ...prev, page: corrected }), replace: true })
   }, [corrected, navigate])
 
   const topRef = useRef<HTMLElement>(null)
@@ -51,7 +50,7 @@ export function CatalogPage() {
     topRef.current?.scrollIntoView({ block: 'start' })
   }
   const goToPage = (page: number) => {
-    void navigate({ search: (prev) => ({ ...prev, page }) })
+    void navigate({ to: '/', search: (prev) => ({ ...prev, page }) })
     focusCatalog()
   }
   const clearFilters = () => update(CLEARED)

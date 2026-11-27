@@ -9,9 +9,13 @@ describe('shouldPrioritizeGrid', () => {
     expect(shouldPrioritizeGrid({ isPending: false, isError: true })).toBe(true)
   })
   it('prioriza quando os destaques vêm vazios', () => {
-    expect(shouldPrioritizeGrid({ isPending: false, isError: false, data: { items: [] } })).toBe(true)
+    expect(shouldPrioritizeGrid({ isPending: false, isError: false, data: { items: [] } })).toBe(
+      true,
+    )
   })
   it('não prioriza com hero/carrossel', () => {
-    expect(shouldPrioritizeGrid({ isPending: false, isError: false, data: { items: [1] } })).toBe(false)
+    expect(shouldPrioritizeGrid({ isPending: false, isError: false, data: { items: [1] } })).toBe(
+      false,
+    )
   })
 })
