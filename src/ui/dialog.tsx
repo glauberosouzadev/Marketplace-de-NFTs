@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { XIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { keepOpenOnNotices } from './notices-region'
 
 const Dialog = DialogPrimitive.Root
 const DialogTrigger = DialogPrimitive.Trigger
@@ -21,6 +22,7 @@ function DialogOverlay({ className, ...props }: ComponentProps<typeof DialogPrim
 function DialogContent({
   className,
   children,
+  onInteractOutside,
   ...props
 }: ComponentProps<typeof DialogPrimitive.Content>) {
   return (
@@ -32,6 +34,7 @@ function DialogContent({
           'border-b-primary bg-card text-card-foreground fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-md border-b-4 p-6 outline-none sm:max-w-lg',
           className,
         )}
+        onInteractOutside={keepOpenOnNotices(onInteractOutside)}
         {...props}
       >
         {children}

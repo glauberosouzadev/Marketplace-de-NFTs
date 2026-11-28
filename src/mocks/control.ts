@@ -1,9 +1,9 @@
-import type { Cart, KurioEvent, Order, OrderStatus } from '@/contracts'
+import type { Cart, KurioEvent, Order } from '@/contracts'
 import { clearPersisted } from './db/persist'
-import { getDb, mutateDb, nextVersion } from './db/store'
+import type { SettlementStatus } from './db/orders'
+import { getDb, mutateDb } from './db/store'
+import { disconnectConnection, rejectNextConnection } from './db/wallets'
 import {
-  buildOrderEvent,
-  emitEvent,
   emitStale,
   replayLastEvent,
   setRealtimeDown,
@@ -12,6 +12,7 @@ import {
 } from './handlers/ws'
 import { activateScenario } from './scenarios/active'
 import { findScenario } from './scenarios/definitions'
+import { settleOrder } from './settlement'
 
 export interface MockControl {
   reset(): void
@@ -22,8 +23,10 @@ export interface MockControl {
   restoreRealtime(): void
   replayLastEvent(): void
   emitStale(resource: KurioEvent['resource']): void
-  settleOrder(orderId: string, status: Exclude<OrderStatus, 'pending'>): void
+  settleOrder(orderId: string, status: SettlementStatus): void
   expireSession(): void
+  rejectNextConnection(): void
+  disconnectWallet(connectionId: string): void
   listOrders(): Order[]
   listCarts(): Cart[]
 }
@@ -34,18 +37,6 @@ function setScenario(id: string): void {
     db.meta.scenario = id
   })
   activateScenario(id)
-}
-
-function settleOrder(orderId: string, status: Exclude<OrderStatus, 'pending'>): void {
-  const settled = mutateDb((db) => {
-    const order = db.orders.find((o) => o.id === orderId)
-    if (!order) return null
-    order.status = status
-    order.version = nextVersion(order.version)
-    order.settledAt = new Date().toISOString()
-    return structuredClone(order)
-  })
-  if (settled) emitEvent(buildOrderEvent(settled, settled.version))
 }
 
 function expireSession(): void {
@@ -86,6 +77,10 @@ export function installMockControl(): void {
     emitStale,
     settleOrder,
     expireSession,
+    rejectNextConnection,
+    disconnectWallet: (connectionId) => {
+      disconnectConnection(connectionId)
+    },
     listOrders: () => structuredClone(getDb().orders),
     listCarts: () => structuredClone(getDb().carts),
   }

@@ -18,7 +18,8 @@ export const SCENARIOS: readonly Scenario[] = [
     ...base,
     id: 'default',
     name: 'Padrao',
-    description: 'Latencia curta e sem falhas.',
+    description: 'Latencia curta e sem falhas; pedido liquidado pelo controle.',
+    flows: { order: 'manual' },
   },
   {
     ...base,
@@ -46,6 +47,7 @@ export const SCENARIOS: readonly Scenario[] = [
     routes: {
       'GET /nfts': { failure: transient, failTimes: FIRST_FAILURES },
       'GET /nfts/:id': { failure: transient, failTimes: FIRST_FAILURES },
+      'GET /me/wallets': { failure: transient, failTimes: 2 },
       'GET /nfts/facets': { failure: { kind: 'offline' }, failTimes: FIRST_FAILURES },
       'GET /nfts/featured': { failure: { kind: 'timeout' }, failTimes: FIRST_FAILURES },
       'POST /quotes': {

@@ -95,7 +95,7 @@ export function updateNft(input: UpdateNftInput): void {
   if (updated) emitEvent(buildNftEvent(updated, updated.version))
 }
 
-function buildNftEvent(nft: Nft, version: number): NftUpdatedEvent {
+export function buildNftEvent(nft: Nft, version: number): NftUpdatedEvent {
   return {
     id: nextEventId(),
     version,

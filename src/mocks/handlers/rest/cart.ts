@@ -9,18 +9,21 @@ import {
   type CartOwner,
 } from '../../db/cart'
 import { getDb } from '../../db/store'
-import { apiUrl, errorResponse, resolveGuestCartId, resolveSession, withScenario } from '../util'
+import {
+  apiUrl,
+  errorResponse,
+  resolveGuestCartId,
+  resolveSession,
+  sessionError,
+  withScenario,
+} from '../util'
 
 /** Com `Authorization` presente, falha de sessão nunca cai no carrinho de visitante. */
 export function resolveOwner(request: Request): CartOwner | Response {
   if (request.headers.has('Authorization')) {
     const resolved = resolveSession(request)
     if (resolved) return `user:${resolved.user.id}`
-    const token = /^Bearer (.+)$/.exec(request.headers.get('Authorization') ?? '')?.[1]
-    const expired = getDb().sessions.some((x) => x.token === token)
-    return expired
-      ? errorResponse(401, 'SESSION_EXPIRED', 'Sessão expirada')
-      : errorResponse(401, 'UNAUTHENTICATED', 'Sessão inválida')
+    return sessionError(request)
   }
   const guestId = resolveGuestCartId(request)
   return guestId ? `guest:${guestId}` : unauthenticated()

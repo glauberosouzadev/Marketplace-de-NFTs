@@ -10,7 +10,7 @@ const MESSAGES: Record<ErrorCode, string> = {
   AVAILABILITY_CONFLICT: 'Este item não está mais disponível na quantidade pedida.',
   EMAIL_TAKEN: 'Este e-mail já está em uso.',
   USERNAME_TAKEN: 'Este nome de usuário já está em uso.',
-  QUOTE_STALE: 'Os valores mudaram. Revise o resumo e confirme novamente.',
+  QUOTE_STALE: 'Os valores mudaram. Revise e confirme novamente.',
   IDEMPOTENCY_CONFLICT: 'Este pedido já foi enviado com outros dados.',
   WALLET_DISCONNECTED: 'Sua carteira foi desconectada. Conecte-a novamente.',
   COUPON_INVALID: 'Cupom inválido.',
@@ -23,6 +23,12 @@ const ERROR_CODES = new Set<string>(Object.keys(MESSAGES))
 export function isErrorCode(value: unknown): value is ErrorCode {
   return typeof value === 'string' && ERROR_CODES.has(value)
 }
+
+/** Estados do pedido sem código de erro (FR-33); textos próprios, fora do Figma. */
+export const ORDER_STATUS_MESSAGES = {
+  pending: 'Aguardando confirmação do pagamento…',
+  rejected: 'Pagamento recusado. Seus itens continuam no carrinho.',
+} as const
 
 /** Tabela única de mensagens em pt-BR (TSD-10). */
 export function errorMessage(code: ErrorCode): string {

@@ -22,7 +22,10 @@ function create(token: string | null): Socket {
   })
   client.on('connect', () => connectionStatus.set('connected'))
   client.on('disconnect', () => connectionStatus.set('reconnecting'))
-  client.on('connect_error', () => connectionStatus.set('reconnecting'))
+  client.on('connect_error', () => {
+    // Falha na primeira conexão não é queda: só há "Reconectando…" depois de ter conectado.
+    if (connectionStatus.get() !== 'connecting') connectionStatus.set('reconnecting')
+  })
   EVENT_TYPES.forEach((type) =>
     client.on(type, (event: KurioEvent) => listeners.forEach((listener) => listener(event))),
   )
@@ -31,6 +34,7 @@ function create(token: string | null): Socket {
 
 function connectRealtime(token: string | null): void {
   if (socket && token === currentToken) return
+  socket?.removeAllListeners()
   socket?.disconnect()
   currentToken = token
   socket = create(token)

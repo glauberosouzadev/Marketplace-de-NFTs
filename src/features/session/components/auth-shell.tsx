@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from 'react'
+import { useEffect, useId, useSyncExternalStore, type ReactNode } from 'react'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { authSearchSchema, type AuthSearch } from '@/contracts'
 import { cn } from '@/lib/cn'
+import { useFocusReturn } from '@/lib/use-focus-return'
 import { useMediaQuery } from '@/lib/use-media-query'
 import { noticeBus } from '@/realtime/notices'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/ui/dialog'
@@ -58,9 +59,7 @@ interface AuthShellProps {
 export function AuthShell({ mode, background }: AuthShellProps) {
   const search = authSearchSchema.parse(useSearch({ strict: false }))
   const navigate = useNavigate()
-  // A rota abre o modal sem DialogTrigger; guarda quem tinha o foco para devolvê-lo ao fechar.
-  const opener = useRef<Element | null>(null)
-  opener.current ??= document.activeElement
+  const returnFocus = useFocusReturn()
   const isDesktop = useMediaQuery('(min-width: 1024px)')
   const copy = COPY[mode]
   const linkSearch = toSearch(search)
@@ -113,13 +112,7 @@ export function AuthShell({ mode, background }: AuthShellProps) {
       <Dialog open onOpenChange={(open) => !open && goBack()}>
         <DialogContent
           aria-describedby={expired ? expiredId : undefined}
-          onCloseAutoFocus={(event) => {
-            const target = opener.current
-            if (target instanceof HTMLElement && target.isConnected) {
-              event.preventDefault()
-              target.focus()
-            }
-          }}
+          onCloseAutoFocus={returnFocus}
           className="[&>button]:text-price max-w-[500px] gap-0 rounded-none p-0 sm:max-w-[500px]"
         >
           <UnavailableNoticeProvider>
