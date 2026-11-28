@@ -18,9 +18,21 @@ function ensureCart(db: DbState, owner: CartOwner): Cart {
   return cart
 }
 
+/** Cópia de resposta: preço e disponibilidade vêm da edição atual, não do momento da adição. */
+function snapshot(db: DbState, cart: Cart): Cart {
+  const copy = structuredClone(cart)
+  copy.items = copy.items.map((item) => {
+    const edition = db.nfts
+      .find((n) => n.id === item.nftId)
+      ?.editions.find((e) => e.id === item.editionId)
+    return edition ? { ...item, unitPrice: edition.price, available: edition.available } : item
+  })
+  return copy
+}
+
 /** Carrinho do dono; criado vazio na primeira consulta. */
 export const getOrCreateCart = (owner: CartOwner): Cart =>
-  mutateDb((db) => structuredClone(ensureCart(db, owner)))
+  mutateDb((db) => snapshot(db, ensureCart(db, owner)))
 
 export function toCartItem(nft: Nft, edition: Edition, quantity: number): CartItem {
   return {
@@ -42,7 +54,7 @@ export function setCartLine(owner: CartOwner, item: CartItem): Cart {
     if (index >= 0) cart.items[index] = item
     else cart.items.push(item)
     cart.version = nextVersion(cart.version)
-    return structuredClone(cart)
+    return snapshot(db, cart)
   })
 }
 
@@ -51,7 +63,7 @@ export function removeCartLine(owner: CartOwner, nftId: string, editionId: strin
     const cart = ensureCart(db, owner)
     cart.items = cart.items.filter((i) => !sameLine(nftId, editionId)(i))
     cart.version = nextVersion(cart.version)
-    return structuredClone(cart)
+    return snapshot(db, cart)
   })
 }
 
@@ -65,6 +77,6 @@ export function setCartCoupon(owner: CartOwner, code: string | undefined): Cart 
     if (code === undefined) delete cart.couponCode
     else cart.couponCode = code
     cart.version = nextVersion(cart.version)
-    return structuredClone(cart)
+    return snapshot(db, cart)
   })
 }

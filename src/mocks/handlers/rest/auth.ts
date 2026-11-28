@@ -4,7 +4,7 @@ import { mergeGuestCart } from '../../db/merge-cart'
 import { hashPassword, verifyPassword } from '../../db/password'
 import { getDb, mutateDb } from '../../db/store'
 import type { DbState, MockUser } from '../../db/types'
-import { apiUrl, errorResponse, resolveSession, withScenario } from '../util'
+import { apiUrl, errorResponse, resolveSession, sessionError, withScenario } from '../util'
 import { readBody } from './cart'
 
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000
@@ -143,10 +143,7 @@ export const authHandlers = [
         }
         return HttpResponse.json(body)
       }
-      const token = bearerToken(request)
-      return getDb().sessions.some((s) => s.token === token)
-        ? errorResponse(401, 'SESSION_EXPIRED', 'Sessão expirada')
-        : errorResponse(401, 'UNAUTHENTICATED', 'Sessão inválida')
+      return sessionError(request)
     }),
   ),
   http.post(

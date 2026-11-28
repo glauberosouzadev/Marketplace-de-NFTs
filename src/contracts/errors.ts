@@ -1,3 +1,5 @@
+import type { Quote } from './entities'
+
 /** Códigos do envelope de erro (SDD-04, TSD-13 item 2). */
 export type ErrorCode =
   | 'VALIDATION'
@@ -23,6 +25,12 @@ export interface ErrorEnvelope {
   code: ErrorCode
   message: string
   fieldErrors?: FieldErrors
+}
+
+/** Corpo do 409 `QUOTE_STALE` em `POST /orders`: traz a cotação recalculada (SDD-08). */
+export interface QuoteStaleBody extends ErrorEnvelope {
+  code: 'QUOTE_STALE'
+  quote: Quote
 }
 
 /** Erro normalizado no cliente (TSD-03). */

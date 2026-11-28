@@ -2,6 +2,7 @@ import type { ComponentProps } from 'react'
 import { Dialog as SheetPrimitive } from 'radix-ui'
 import { XIcon } from 'lucide-react'
 import { cn } from '@/lib/cn'
+import { keepOpenOnNotices } from './notices-region'
 
 const Sheet = SheetPrimitive.Root
 const SheetTrigger = SheetPrimitive.Trigger
@@ -18,7 +19,13 @@ const sideClasses: Record<NonNullable<SheetContentProps['side']>, string> = {
   bottom: 'inset-x-0 bottom-0 h-auto rounded-t-3xl border-t',
 }
 
-function SheetContent({ className, children, side = 'right', ...props }: SheetContentProps) {
+function SheetContent({
+  className,
+  children,
+  side = 'right',
+  onInteractOutside,
+  ...props
+}: SheetContentProps) {
   return (
     <SheetPrimitive.Portal>
       <SheetPrimitive.Overlay
@@ -32,6 +39,7 @@ function SheetContent({ className, children, side = 'right', ...props }: SheetCo
           sideClasses[side],
           className,
         )}
+        onInteractOutside={keepOpenOnNotices(onInteractOutside)}
         {...props}
       >
         {children}

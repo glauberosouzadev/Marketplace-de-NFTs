@@ -35,6 +35,8 @@ export interface MockMeta {
   eventSeq: number
   schemaVersion: number
   scenario: string
+  /** A próxima conexão de carteira será recusada (uma única vez). */
+  rejectNextConnection: boolean
 }
 
 export interface DbState {

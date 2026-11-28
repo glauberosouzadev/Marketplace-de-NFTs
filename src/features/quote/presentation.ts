@@ -30,9 +30,10 @@ export const issueText = (issue: QuoteIssue, name = 'um item do carrinho'): stri
 
 const BLOCKING: ReadonlySet<QuoteIssueType> = new Set(['SOLD_OUT', 'QUANTITY_EXCEEDS'])
 
+export const isBlockingIssue = (issue: QuoteIssue): boolean => BLOCKING.has(issue.type)
+
 /** FR-55: item esgotado ou acima do disponível impede finalizar até o carrinho ser ajustado. */
-export const hasBlockingIssue = (quote: Quote): boolean =>
-  quote.issues.some((issue) => BLOCKING.has(issue.type))
+export const hasBlockingIssue = (quote: Quote): boolean => quote.issues.some(isBlockingIssue)
 
 export const checkoutHref = (authenticated: boolean): string =>
   authenticated ? CHECKOUT_PATH : loginHref(CHECKOUT_PATH)

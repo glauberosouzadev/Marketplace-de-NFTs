@@ -3,7 +3,6 @@ import { useSession } from '@/features/session/queries'
 import { Button } from '@/ui/button'
 import { checkoutHref } from '../presentation'
 
-/** `/pagamento` é do EPIC-04: navegação por `href` evita reservar a rota antes de existir. */
 interface CheckoutCtaProps {
   disabled: boolean
   /** Id do texto que explica o bloqueio, quando houver. */

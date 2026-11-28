@@ -15,6 +15,7 @@ function setup() {
   const clear = client.clear.bind(client)
   const teardown = createSessionTeardown({
     restartRealtime: vi.fn(() => void order.push('socket')),
+    resetEventDedupe: vi.fn(() => void order.push('dedupe')),
     queryClient: {
       cancelQueries: () => {
         order.push('cancel')
@@ -41,7 +42,7 @@ describe('logout / troca de usuário', () => {
   it('segue a ordem fixa e esvazia o cache inteiro', async () => {
     const { client, order, teardown } = setup()
     await teardown.clearPrivateState('u-a')
-    expect(order).toEqual(['socket', 'cancel', 'clear', 'storage:u-a', 'nav:/'])
+    expect(order).toEqual(['socket', 'cancel', 'clear', 'storage:u-a', 'dedupe', 'nav:/'])
     expect(client.getQueryCache().getAll()).toHaveLength(0)
   })
 
@@ -74,6 +75,7 @@ describe('expiração', () => {
       'cancel',
       'clear',
       'session',
+      'dedupe',
       `nav:${expiredLoginHref('/pagamento?step=2')}`,
     ])
     expect(order.some((s) => s.startsWith('storage:'))).toBe(false)

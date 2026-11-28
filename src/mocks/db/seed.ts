@@ -17,6 +17,11 @@ export function buildSeed(): DbState {
     carts: [],
     orders: [],
     favorites: [],
-    meta: { schemaVersion: SCHEMA_VERSION, eventSeq: 0, scenario: 'default' },
+    meta: {
+      schemaVersion: SCHEMA_VERSION,
+      eventSeq: 0,
+      scenario: 'default',
+      rejectNextConnection: false,
+    },
   }
 }

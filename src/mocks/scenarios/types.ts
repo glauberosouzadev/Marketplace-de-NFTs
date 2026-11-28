@@ -20,7 +20,8 @@ export interface ScenarioFlows {
   catalog?: 'empty'
   session?: 'expired' | 'unauthorized'
   purchase?: 'price-changed' | 'sold-out'
-  order?: 'confirmed' | 'declined' | 'timeout-after-create'
+  /** `manual`: liquida só por `settleOrder`; `confirmed`/`declined` liquidam após a latência. */
+  order?: 'manual' | 'confirmed' | 'declined' | 'timeout-after-create'
 }
 
 export interface Scenario {

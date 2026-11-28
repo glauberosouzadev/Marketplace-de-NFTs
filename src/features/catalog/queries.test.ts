@@ -13,7 +13,7 @@ describe('opções das queries (SDD-06)', () => {
   it('facetas, destaques: 60 s; detalhe: 30 s', () => {
     expect(facetsQuery({} as never).staleTime).toBe(60_000)
     expect(featuredQuery().staleTime).toBe(60_000)
-    expect(nftQuery('x').staleTime).toBe(30_000)
+    expect(nftQuery('x', { observeNft: () => undefined }).staleTime).toBe(30_000)
   })
 
   it('retry: 404 nunca; 5xx até 2', () => {

@@ -6,6 +6,7 @@ import {
   patchSearch,
   safeRedirect,
   toListQuery,
+  walletsSearchSchema,
 } from './search'
 
 const base = catalogSearchSchema.parse({})
@@ -118,5 +119,15 @@ describe('loginHref', () => {
     expect(url.pathname).toBe('/login')
     expect(url.searchParams.get('redirect')).toBe('/pedido/1?a=b')
     expect(new URL(loginHref('//evil.com'), 'http://x').searchParams.get('redirect')).toBe('/')
+  })
+})
+
+describe('walletsSearchSchema', () => {
+  it('aceita só caminho interno como retorno; o resto vira "sem retorno"', () => {
+    expect(walletsSearchSchema.parse({ redirect: '/pagamento' })).toEqual({
+      redirect: '/pagamento',
+    })
+    expect(walletsSearchSchema.parse({ redirect: 'https://evil.com' })).toEqual({ redirect: '/' })
+    expect(walletsSearchSchema.parse({})).toEqual({ redirect: '/' })
   })
 })

@@ -64,6 +64,9 @@ export const authSearchSchema = z.object({
   reason: z.enum(['expired']).optional().catch(undefined),
 })
 
+/** `/carteiras?redirect=`: caminho interno para voltar após salvar; `/` (padrão) significa sem retorno. */
+export const walletsSearchSchema = authSearchSchema.pick({ redirect: true })
+
 export type AuthSearch = z.infer<typeof authSearchSchema>
 
 export function loginHref(redirect: string, reason?: AuthSearch['reason']): string {

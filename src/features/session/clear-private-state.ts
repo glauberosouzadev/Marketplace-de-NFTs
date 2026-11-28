@@ -7,6 +7,7 @@ import type { PrivateStateCleaner } from './mutations'
 
 export interface PrivateStateDeps {
   restartRealtime: () => void | Promise<void>
+  resetEventDedupe: () => void
   queryClient: Pick<QueryClient, 'cancelQueries' | 'clear'>
   clearSession: () => void
   clearUserStorage: (uid: string | null) => void
@@ -26,7 +27,8 @@ export const expiredLoginHref = (currentHref: string): string => loginHref(curre
 
 /**
  * Rotina única de encerramento (SDD-07, RN-13), na ordem fixa: socket → cache → armazenamento
- * → navegação. Uma execução em andamento é reaproveitada por chamadas simultâneas.
+ * → dedupe de eventos → navegação. Uma execução em andamento é reaproveitada por chamadas
+ * simultâneas.
  */
 export function createSessionTeardown(deps: PrivateStateDeps): SessionTeardown {
   let running: Promise<void> | null = null
@@ -36,7 +38,7 @@ export function createSessionTeardown(deps: PrivateStateDeps): SessionTeardown {
     await deps.queryClient.cancelQueries()
     deps.queryClient.clear()
     clearStorage()
-    // Passo 5 (zerar dedupe de eventos) entra com o reconciliador do EPIC-04.
+    deps.resetEventDedupe()
     await deps.navigate(href)
   }
 
