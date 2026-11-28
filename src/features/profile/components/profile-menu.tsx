@@ -9,23 +9,30 @@ import {
   User,
   type LucideIcon,
 } from 'lucide-react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useLogout } from '@/features/session/mutations'
 import { cn } from '@/lib/cn'
 import { OutOfScopeButton } from '@/ui/shell/out-of-scope'
 
 const ITEM_CLASS =
   'text-primary focus-visible:ring-ring flex w-full items-center gap-3 px-4 py-3 text-left text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset'
+const ACTIVE_CLASS = 'border-primary bg-secondary/40 border-l-4 pl-3'
 
-const OTHER_ITEMS: readonly { label: string; icon: LucideIcon }[] = [
+type MenuItem =
+  | { label: string; icon: LucideIcon; to: '/perfil' | '/carteiras' | '/favoritos' }
+  | { label: string; icon: LucideIcon; to?: undefined }
+
+const ITEMS: readonly MenuItem[] = [
+  { label: 'Dados do perfil', icon: User, to: '/perfil' },
+  { label: 'Carteiras', icon: MapPin, to: '/carteiras' },
   { label: 'Atividade', icon: ShoppingBag },
-  { label: 'Lista de interesse', icon: Heart },
+  { label: 'Lista de interesse', icon: Heart, to: '/favoritos' },
   { label: 'Ofertas', icon: Bell },
   { label: 'Arquivos baixados', icon: Download },
   { label: 'Suporte', icon: TriangleAlert },
 ]
 
-/** Menu lateral do perfil: só "Carteiras" é navegável; os demais itens são inertes (EPIC-05). */
+/** Menu lateral do perfil: páginas existentes são links; os demais itens são inertes (Q-08). */
 export function ProfileMenu() {
   const logout = useLogout()
   const navigate = useNavigate()
@@ -38,27 +45,23 @@ export function ProfileMenu() {
         Meu perfil
       </h2>
       <ul>
-        <li>
-          <OutOfScopeButton className={ITEM_CLASS}>
-            <User aria-hidden className="size-4" />
-            Dados do perfil
-          </OutOfScopeButton>
-        </li>
-        <li>
-          <span
-            aria-current="page"
-            className={cn(ITEM_CLASS, 'border-primary bg-secondary/40 border-l-4 pl-3')}
-          >
-            <MapPin aria-hidden className="size-4" />
-            Carteiras
-          </span>
-        </li>
-        {OTHER_ITEMS.map(({ label, icon: Icon }) => (
+        {ITEMS.map(({ label, icon: Icon, to }) => (
           <li key={label}>
-            <OutOfScopeButton className={ITEM_CLASS}>
-              <Icon aria-hidden className="size-4" />
-              {label}
-            </OutOfScopeButton>
+            {to ? (
+              <Link
+                to={to}
+                className={ITEM_CLASS}
+                activeProps={{ 'aria-current': 'page', className: cn(ITEM_CLASS, ACTIVE_CLASS) }}
+              >
+                <Icon aria-hidden className="size-4" />
+                {label}
+              </Link>
+            ) : (
+              <OutOfScopeButton className={ITEM_CLASS}>
+                <Icon aria-hidden className="size-4" />
+                {label}
+              </OutOfScopeButton>
+            )}
           </li>
         ))}
       </ul>

@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
-import type { Wallet } from '@/contracts'
+import type { Wallet, WalletSlot } from '@/contracts'
 import { applyApiError } from '@/features/session/form-errors'
 import { Button } from '@/ui/button'
 import { Form } from '@/ui/form'
@@ -20,17 +20,24 @@ import { EnsField, SelectField, TextField } from './wallet-fields'
 
 interface WalletFormProps {
   uid: string
+  slot: WalletSlot
   wallet: Wallet | null
   /** Caminho interno para voltar após salvar (ex.: o pagamento). */
-  returnTo: string | undefined
+  returnTo?: string | undefined
+  /** Leva o foco ao primeiro campo ao montar (formulário revelado pelo usuário). */
+  focusOnMount?: boolean
 }
 
-export function WalletForm({ uid, wallet, returnTo }: WalletFormProps) {
+export function WalletForm({ uid, slot, wallet, returnTo, focusOnMount = false }: WalletFormProps) {
   const router = useRouter()
   const form = useForm<WalletFormValues>({
     resolver: zodResolver(walletFormSchema),
     defaultValues: walletToFormValues(wallet),
   })
+  const { setFocus } = form
+  useEffect(() => {
+    if (focusOnMount) setFocus('displayName')
+  }, [focusOnMount, setFocus])
   const { mutate, isPending } = useUpsertWallet(uid)
   const [formError, setFormError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
@@ -41,7 +48,7 @@ export function WalletForm({ uid, wallet, returnTo }: WalletFormProps) {
     setFormError(null)
     setSaved(false)
     mutate(
-      { slot: 'primary', body },
+      { slot, body },
       {
         onSuccess: () => {
           form.reset(values)

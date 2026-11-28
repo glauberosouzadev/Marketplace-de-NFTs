@@ -48,6 +48,7 @@ export const SCENARIOS: readonly Scenario[] = [
       'GET /nfts': { failure: transient, failTimes: FIRST_FAILURES },
       'GET /nfts/:id': { failure: transient, failTimes: FIRST_FAILURES },
       'GET /me/wallets': { failure: transient, failTimes: 2 },
+      'PUT /me/favorites/:nftId': { failure: transient, failTimes: 1 },
       'GET /nfts/facets': { failure: { kind: 'offline' }, failTimes: FIRST_FAILURES },
       'GET /nfts/featured': { failure: { kind: 'timeout' }, failTimes: FIRST_FAILURES },
       'POST /quotes': {

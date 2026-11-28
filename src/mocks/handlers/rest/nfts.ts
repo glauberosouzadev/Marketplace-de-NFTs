@@ -126,7 +126,7 @@ function sortNfts(nfts: Nft[], sort: NftSort): Nft[] {
   return [...nfts].sort((a, b) => primary(a, b) || byId(a, b))
 }
 
-function toSummary(nft: Nft): NftSummary {
+export function toSummary(nft: Nft): NftSummary {
   const summary: Partial<Nft> = { ...nft }
   delete summary.editions
   return summary as NftSummary

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Bird, Camera, Play } from 'lucide-react'
 import { OutOfScopeButton } from './out-of-scope'
 
@@ -20,10 +21,12 @@ const benefits = [
   },
 ]
 
+const WISHLIST_LABEL = 'Lista de interesse'
+
 const columns = [
   {
     title: 'Meu perfil',
-    links: ['Meu perfil', 'Minha coleção', 'Atividade', 'Estúdio do criador', 'Lista de interesse'],
+    links: ['Meu perfil', 'Minha coleção', 'Atividade', 'Estúdio do criador', WISHLIST_LABEL],
   },
   {
     title: 'Central de ajuda',
@@ -70,7 +73,7 @@ function WalletBadges() {
   )
 }
 
-/** Rodapé desktop (>= 1024 px), conforme desktop-pagamento.png; todo item é inerte (Q-08). */
+/** Rodapé desktop (>= 1024 px), conforme desktop-pagamento.png; só 'Lista de interesse' navega; o resto é inerte (Q-08). */
 export function Footer() {
   return (
     <footer className="mx-auto mt-20 hidden w-full max-w-[1200px] pb-6 lg:block">
@@ -122,11 +125,17 @@ export function Footer() {
           {columns.map((col) => (
             <nav key={col.title} aria-label={col.title} className="flex flex-col items-start gap-3">
               <h2 className="mb-1 text-lg font-bold">{col.title}</h2>
-              {col.links.map((label) => (
-                <OutOfScopeButton key={label} className={linkClass}>
-                  {label}
-                </OutOfScopeButton>
-              ))}
+              {col.links.map((label) =>
+                label === WISHLIST_LABEL ? (
+                  <Link key={label} to="/favoritos" className={linkClass}>
+                    {label}
+                  </Link>
+                ) : (
+                  <OutOfScopeButton key={label} className={linkClass}>
+                    {label}
+                  </OutOfScopeButton>
+                ),
+              )}
             </nav>
           ))}
           <div className="flex flex-col items-start">

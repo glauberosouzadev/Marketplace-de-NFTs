@@ -25,9 +25,17 @@ export function TabBar() {
       >
         <House aria-hidden className="size-6" />
       </Link>
-      <OutOfScopeButton aria-label="Favoritos" className={`${itemClass} justify-self-center`}>
+      <Link
+        to="/favoritos"
+        aria-label="Favoritos"
+        className={`${itemClass} justify-self-center`}
+        activeProps={{
+          'aria-current': 'page',
+          className: `${itemClass} justify-self-center text-primary`,
+        }}
+      >
         <Heart aria-hidden className="size-6" />
-      </OutOfScopeButton>
+      </Link>
       <OutOfScopeButton
         aria-label="Ação rápida"
         className="bg-primary-gradient text-primary-foreground focus-visible:ring-ring focus-visible:ring-offset-background relative -top-8 size-16 place-self-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
@@ -42,9 +50,17 @@ export function TabBar() {
         <ShoppingCart aria-hidden className="size-6" />
         <CartBadge />
       </Link>
-      <OutOfScopeButton aria-label="Perfil" className={`${itemClass} justify-self-center`}>
+      <Link
+        to="/perfil"
+        aria-label="Perfil"
+        className={`${itemClass} justify-self-center`}
+        activeProps={{
+          'aria-current': 'page',
+          className: `${itemClass} justify-self-center text-primary`,
+        }}
+      >
         <User aria-hidden className="size-6" />
-      </OutOfScopeButton>
+      </Link>
     </nav>
   )
 }

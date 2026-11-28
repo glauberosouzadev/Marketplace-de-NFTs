@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { ChevronDown, LogOut } from 'lucide-react'
 import type { User } from '@/contracts'
 import { useLogout } from '@/features/session/mutations'
@@ -10,9 +10,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/ui/dropdown-menu'
-import { publishOutOfScope } from './out-of-scope'
 
-/** Menu do usuário logado (Q-13): Perfil e Carteiras inertes até o EPIC-05; Sair faz o logout completo. */
+/** Menu do usuário logado (Q-13): Perfil e Carteiras navegam (guard cuida do visitante); Sair faz o logout completo. */
 export function UserMenu({ user }: { user: User }) {
   const logout = useLogout()
   const navigate = useNavigate()
@@ -40,8 +39,12 @@ export function UserMenu({ user }: { user: User }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuLabel>{user.email}</DropdownMenuLabel>
-        <DropdownMenuItem onSelect={publishOutOfScope}>Perfil</DropdownMenuItem>
-        <DropdownMenuItem onSelect={publishOutOfScope}>Carteiras</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/perfil">Perfil</Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/carteiras">Carteiras</Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={signOut} disabled={logout.isPending}>
           <LogOut aria-hidden className="size-4" />

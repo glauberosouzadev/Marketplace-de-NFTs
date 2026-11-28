@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { gotoApp } from './support'
+import { gotoApp, primaryWallet } from './support'
 
 const ANA = { email: 'ana@kurio.test', password: 'Kurio@2026' }
 const ETH_ADDRESS = '0x71c7656ec7ab88b098defb751b7401b5f6d8976f'
@@ -8,9 +8,11 @@ const SOLANA_ADDRESS = '7Xk9aQ2mPzR4tVb8NcLfH3yJdWe6SgUo1ZiA5nMhKqTp'
 const REQUIRED = 'Campo obrigatório'
 const INVALID_ADDRESS = 'Endereço inválido para a rede selecionada'
 
-const field = (page: Page, label: string) => page.getByRole('textbox', { name: label, exact: true })
-const combo = (page: Page, label: RegExp) => page.getByRole('combobox', { name: label })
-const save = (page: Page) => page.getByRole('button', { name: 'Salvar carteira' })
+const field = (page: Page, label: string) =>
+  primaryWallet(page).getByRole('textbox', { name: label, exact: true })
+const combo = (page: Page, label: RegExp) =>
+  primaryWallet(page).getByRole('combobox', { name: label })
+const save = (page: Page) => primaryWallet(page).getByRole('button', { name: 'Salvar carteira' })
 
 async function login(page: Page, user = ANA): Promise<void> {
   await gotoApp(page, '/login')
@@ -49,7 +51,9 @@ async function fillAll(page: Page, address: string): Promise<void> {
   await field(page, 'Endereço da carteira').fill(address)
   await pick(page, /^Tipo de carteira/, 'MetaMask')
   await field(page, 'E-mail').fill('novo@kurio.test')
-  await page.getByRole('textbox', { name: /^Nome ENS/ }).fill('novo')
+  await primaryWallet(page)
+    .getByRole('textbox', { name: /^Nome ENS/ })
+    .fill('novo')
 }
 
 test.describe('@main @responsive E2E-09 carteiras: carteira principal', () => {
@@ -67,7 +71,10 @@ test.describe('@main @responsive E2E-09 carteiras: carteira principal', () => {
     await expect(field(page, 'Endereço da carteira')).toHaveValue(ETH_ADDRESS)
     await expect(combo(page, /^Rede/)).toContainText('Ethereum')
     await expect(combo(page, /^Tipo de carteira/)).toContainText('MetaMask')
-    await expect(page.getByText('Você ainda não adicionou uma carteira secundária.')).toBeVisible()
+    const secondary = page.getByRole('region', { name: 'Carteira secundária' })
+    await expect(secondary.getByRole('textbox', { name: 'Apelido da carteira' })).toHaveValue(
+      'Carteira secundária',
+    )
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     )
@@ -80,7 +87,7 @@ test.describe('@main @responsive E2E-09 carteiras: carteira principal', () => {
     await login(page)
     await openWallets(page)
 
-    const referral = page.getByRole('textbox', { name: 'Código de indicação', exact: true })
+    const referral = field(page, 'Código de indicação')
     await expect(referral).toBeVisible()
     await expect(referral).not.toHaveAttribute('aria-required', 'true')
     await expect(referral).not.toHaveAttribute('required', /.*/)
@@ -95,15 +102,13 @@ test.describe('@main @responsive E2E-09 carteiras: carteira principal', () => {
     await openWallets(page)
 
     await field(page, 'Apelido da carteira').fill('Cofre editado')
-    await page.getByRole('textbox', { name: 'Código de indicação', exact: true }).fill('')
+    await field(page, 'Código de indicação').fill('')
     await save(page).click()
 
     await expect(page.getByRole('status').filter({ hasText: 'Carteira salva.' })).toBeVisible()
     await page.reload()
     await expect(field(page, 'Apelido da carteira')).toHaveValue('Cofre editado')
-    await expect(
-      page.getByRole('textbox', { name: 'Código de indicação', exact: true }),
-    ).toHaveValue('')
+    await expect(field(page, 'Código de indicação')).toHaveValue('')
   })
 
   test('obrigatórios vazios mostram erro nos campos e focam o primeiro inválido', async ({
@@ -153,6 +158,7 @@ test.describe('@main @responsive E2E-09 carteiras: carteira principal', () => {
 
     await expect(field(page, 'Nome de exibição')).toHaveValue('')
     await expect(field(page, 'Endereço da carteira')).toHaveValue('')
+    await expect(page.getByText('Você ainda não adicionou uma carteira secundária.')).toBeVisible()
     await fillAll(page, ETH_ADDRESS)
     await save(page).click()
     await expect(page.getByRole('status').filter({ hasText: 'Carteira salva.' })).toBeVisible()
@@ -166,7 +172,9 @@ test.describe('@main @responsive E2E-09 carteiras: carteira principal', () => {
     await login(page)
     await openWallets(page)
 
-    await page.getByRole('textbox', { name: /^Nome ENS/ }).focus()
+    await primaryWallet(page)
+      .getByRole('textbox', { name: /^Nome ENS/ })
+      .focus()
     await page.keyboard.press('Tab')
     await expect(save(page)).toBeFocused()
     await expect(save(page)).not.toHaveCSS('box-shadow', 'none')

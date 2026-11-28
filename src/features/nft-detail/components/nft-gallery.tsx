@@ -1,12 +1,18 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import type { NftImage } from '@/contracts'
 import { cn } from '@/lib/cn'
 
 const DETAIL_WIDTH = 450
 const DETAIL_HEIGHT = 563
 
-/** Imagem principal (a de detalhe, `images[1]`, quando existe) e miniaturas navegáveis por teclado. */
-export function NftGallery({ images }: { images: readonly NftImage[] }) {
+/** Imagem principal (a de detalhe, `images[1]`, quando existe) e miniaturas navegáveis por teclado. `action` fica no canto superior direito da imagem. */
+export function NftGallery({
+  images,
+  action,
+}: {
+  images: readonly NftImage[]
+  action?: ReactNode
+}) {
   const initial = images.length > 1 ? 1 : 0
   const [selected, setSelected] = useState(initial)
   const current = images[selected]
@@ -15,16 +21,19 @@ export function NftGallery({ images }: { images: readonly NftImage[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <img
-        key={current.url}
-        src={current.url}
-        alt={current.alt}
-        width={DETAIL_WIDTH}
-        height={DETAIL_HEIGHT}
-        fetchPriority={isInitial ? 'high' : undefined}
-        loading={isInitial ? undefined : 'lazy'}
-        className="aspect-[4/5] w-full rounded-xl object-cover lg:rounded-md"
-      />
+      <div className="relative">
+        <img
+          key={current.url}
+          src={current.url}
+          alt={current.alt}
+          width={DETAIL_WIDTH}
+          height={DETAIL_HEIGHT}
+          fetchPriority={isInitial ? 'high' : undefined}
+          loading={isInitial ? undefined : 'lazy'}
+          className="aspect-[4/5] w-full rounded-xl object-cover lg:rounded-md"
+        />
+        {action && <div className="absolute top-3 right-3">{action}</div>}
+      </div>
       {images.length > 1 && (
         <ul aria-label="Imagens do NFT" className="flex gap-3">
           {images.map((image, index) => (

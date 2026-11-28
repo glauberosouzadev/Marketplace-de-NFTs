@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import type { NftSummary } from '@/contracts'
+import { FavoriteButton } from '@/features/favorites/components/favorite-button'
 import { CardActions } from './card-actions'
 
 interface NftCardProps {
@@ -52,6 +53,7 @@ export function NftCard({ nft, priority = false }: NftCardProps) {
           </p>
         </div>
       </Link>
+      <FavoriteButton nft={nft} className="absolute top-3 right-3 z-20 md:top-4 md:right-4" />
       <CardActions nft={nft} />
     </div>
   )

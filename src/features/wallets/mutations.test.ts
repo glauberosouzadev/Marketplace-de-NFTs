@@ -57,6 +57,16 @@ describe('mutations de carteira', () => {
     expect(client.getQueryState(queryKeys.wallets('u-2'))?.isInvalidated).toBe(false)
   })
 
+  it('upsertWallet com slot secondary usa PUT /me/wallets/secondary', async () => {
+    request.mockResolvedValue({})
+    const client = seeded()
+    const observer = new MutationObserver(client, upsertWalletMutation(client, 'u-1') as never)
+    await observer.mutate({ slot: 'secondary', body: upsertBody } as never)
+    expect(request).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'PUT', url: '/me/wallets/secondary' }),
+    )
+  })
+
   it('422 chega com fieldErrors, sem retry e sem invalidar', async () => {
     const invalid: ApiError = {
       kind: 'http',

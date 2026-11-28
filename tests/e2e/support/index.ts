@@ -15,3 +15,13 @@ export async function gotoApp(
   const separator = path.includes('?') ? '&' : '?'
   await page.goto(`${path}${separator}${params}`)
 }
+
+/** Formulário da carteira principal em /carteiras (a página também renderiza a carteira secundária). */
+export function primaryWallet(page: Pick<Page, 'getByRole'>) {
+  return page.getByRole('region', { name: 'Carteira principal' })
+}
+
+/** Formulário da carteira secundária em /carteiras. */
+export function secondaryWallet(page: Pick<Page, 'getByRole'>) {
+  return page.getByRole('region', { name: 'Carteira secundária' })
+}

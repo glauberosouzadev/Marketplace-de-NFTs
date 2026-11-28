@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loginSchema, PASSWORD_POLICY_MESSAGE, registerSchema } from './forms'
+import { loginSchema, PASSWORD_POLICY_MESSAGE, profileSchema, registerSchema } from './forms'
 
 const valid = {
   username: 'ana',
@@ -54,5 +54,87 @@ describe('loginSchema', () => {
     const result = loginSchema.safeParse({ email: 'x', password: '' })
     expect(result.success).toBe(false)
     expect(loginSchema.safeParse({ email: 'a@b.co', password: 'x' }).success).toBe(true)
+  })
+})
+
+describe('profileSchema', () => {
+  const profile = {
+    displayName: 'Ana',
+    username: 'ana',
+    email: 'ana@email.com',
+    ensName: 'ana',
+    walletNickname: 'Principal',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  }
+  const passwords = {
+    currentPassword: 'antiga123',
+    newPassword: 'novaSenha1',
+    confirmPassword: 'novaSenha1',
+  }
+  const issues = (input: unknown) => {
+    const result = profileSchema.safeParse(input)
+    return result.success
+      ? {}
+      : Object.fromEntries(result.error.issues.map((i) => [i.path[0], i.message]))
+  }
+
+  it('aceita dados válidos', () => {
+    expect(profileSchema.safeParse(profile).success).toBe(true)
+  })
+
+  it('exige todos os campos', () => {
+    const empty = { displayName: ' ', username: '', email: '', ensName: '', walletNickname: '' }
+    expect(Object.keys(issues({ ...profile, ...empty }))).toEqual(Object.keys(empty))
+    expect(issues({ ...profile, ...empty }).displayName).toBe('Campo obrigatório')
+  })
+
+  it('rejeita e-mail inválido', () => {
+    expect(issues({ ...profile, email: 'ana@' })).toEqual({ email: 'Digite um e-mail válido' })
+  })
+
+  it('aceita troca de senha completa e válida', () => {
+    expect(profileSchema.safeParse({ ...profile, ...passwords }).success).toBe(true)
+  })
+
+  it('preencher parte da senha exige os três campos', () => {
+    expect(issues({ ...profile, newPassword: 'novaSenha1' })).toEqual({
+      currentPassword: 'Informe a senha atual',
+      confirmPassword: 'Confirme a nova senha',
+    })
+    expect(issues({ ...profile, currentPassword: 'antiga123' })).toEqual({
+      newPassword: 'Informe a nova senha',
+      confirmPassword: 'Confirme a nova senha',
+    })
+  })
+
+  it('aplica a política Q-27 à nova senha', () => {
+    const weak = { ...passwords, newPassword: 'abcdefgh', confirmPassword: 'abcdefgh' }
+    expect(issues({ ...profile, ...weak })).toEqual({ newPassword: PASSWORD_POLICY_MESSAGE })
+  })
+
+  it('nova senha igual à atual é rejeitada', () => {
+    const same = {
+      currentPassword: 'antiga123',
+      newPassword: 'antiga123',
+      confirmPassword: 'antiga123',
+    }
+    expect(issues({ ...profile, ...same })).toEqual({
+      newPassword: 'A nova senha deve ser diferente da atual',
+    })
+  })
+
+  it('confirmação diferente aponta para o campo de confirmação', () => {
+    expect(issues({ ...profile, ...passwords, confirmPassword: 'outraSenha1' })).toEqual({
+      confirmPassword: 'As senhas não conferem',
+    })
+  })
+
+  it('valida a senha mesmo com erro nos dados do perfil', () => {
+    expect(issues({ ...profile, ...passwords, email: 'ana@', confirmPassword: 'x1' })).toEqual({
+      email: 'Digite um e-mail válido',
+      confirmPassword: 'As senhas não conferem',
+    })
   })
 })
