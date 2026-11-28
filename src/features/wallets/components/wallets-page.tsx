@@ -1,34 +1,13 @@
+import { ProfileMenu } from '@/features/profile/components/profile-menu'
 import { BackButton } from '@/ui/shell/back-button'
 import { OutOfScopeButton } from '@/ui/shell/out-of-scope'
 import { useWallets } from '../queries'
-import { ProfileMenu } from './profile-menu'
+import { SecondaryWallet } from './secondary-wallet'
 import { WalletForm } from './wallet-form'
 import { WalletsError, WalletsSkeleton } from './wallets-states'
 
 const LINK_BUTTON =
   'text-primary focus-visible:ring-ring text-sm font-bold outline-none focus-visible:ring-2'
-
-function SecondaryWallet() {
-  return (
-    <section aria-labelledby="secondary-title" className="grid gap-1">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="secondary-title" className="text-lg font-bold">
-          Carteira secundária
-        </h2>
-        <div className="flex items-center gap-3">
-          <OutOfScopeButton className="focus-visible:ring-ring flex items-center gap-2 text-sm outline-none focus-visible:ring-2">
-            <span aria-hidden className="border-primary size-4 rounded-full border-2" />
-            Igual à carteira principal
-          </OutOfScopeButton>
-          <OutOfScopeButton className={LINK_BUTTON}>Adicionar</OutOfScopeButton>
-        </div>
-      </div>
-      <p className="text-muted-foreground text-sm">
-        Você ainda não adicionou uma carteira secundária.
-      </p>
-    </section>
-  )
-}
 
 export function WalletsPage({ uid, returnTo }: { uid: string; returnTo: string | undefined }) {
   const { data, isPending, refetch } = useWallets(uid)
@@ -56,12 +35,12 @@ export function WalletsPage({ uid, returnTo }: { uid: string; returnTo: string |
           {isPending ? (
             <WalletsSkeleton />
           ) : data ? (
-            <WalletForm uid={uid} wallet={data.primary} returnTo={returnTo} />
+            <WalletForm uid={uid} slot="primary" wallet={data.primary} returnTo={returnTo} />
           ) : (
             <WalletsError onRetry={() => void refetch()} />
           )}
         </section>
-        <SecondaryWallet />
+        {data && <SecondaryWallet uid={uid} wallet={data.secondary} primary={data.primary} />}
       </div>
     </main>
   )

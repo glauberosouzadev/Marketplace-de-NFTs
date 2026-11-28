@@ -51,6 +51,7 @@ export const WALLETS: readonly Wallet[] = [
     displayName: 'Ana Colecionadora',
     profileName: 'ana.colecionadora',
     email: 'ana@kurio.test',
+    ensName: 'ana-cofre.eth',
     secondaryRef: 'ana-cofre.eth',
   },
   {

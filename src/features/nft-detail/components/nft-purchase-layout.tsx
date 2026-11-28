@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import type { Nft } from '@/contracts'
+import { FavoriteButton } from '@/features/favorites/components/favorite-button'
 import { useAddToCart } from '@/features/cart/mutations'
 import { errorMessage } from '@/http/error-messages'
 import { isApiError, isSessionExpired } from '@/http/normalize-error'
@@ -71,7 +72,7 @@ export function NftPurchaseLayout({ nft, editionId, onEditionChange }: NftPurcha
 
   return (
     <div className="grid gap-6 pb-56 lg:grid-cols-2 lg:gap-12 lg:pb-0">
-      <NftGallery images={nft.images} />
+      <NftGallery images={nft.images} action={<FavoriteButton nft={nft} />} />
       <div className="flex flex-col gap-6">
         <NftInfo nft={nft}>
           <EditionPicker

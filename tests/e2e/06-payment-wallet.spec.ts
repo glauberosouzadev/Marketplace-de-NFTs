@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { gotoApp } from './support'
+import { gotoApp, primaryWallet } from './support'
 
 const ANA = { email: 'ana@kurio.test', password: 'Kurio@2026' }
 const ETH_ADDRESS = '0x71c7656ec7ab88b098defb751b7401b5f6d8976f'
@@ -171,17 +171,18 @@ test.describe('@main @responsive E2E-06 pagamento: formulário, carteira e conex
     // A URL muda antes da troca de tela: o formulário do pagamento tem os mesmos rótulos.
     await expect(page.getByRole('heading', { name: 'Carteira principal' })).toBeVisible()
 
+    const wallet = primaryWallet(page)
     await field(page, 'Nome de exibição').fill('Nova Pessoa')
     await field(page, 'Apelido da carteira').fill('Minha carteira')
     await field(page, 'Nome do perfil').fill('nova_pessoa')
     await field(page, 'Endereço da carteira').fill(ETH_ADDRESS)
     await field(page, 'E-mail').fill('nova@kurio.test')
-    await page.getByRole('textbox', { name: 'Nome ENS', exact: true }).fill('nova')
-    await page.getByRole('combobox', { name: /^Rede/ }).click()
+    await wallet.getByRole('textbox', { name: 'Nome ENS', exact: true }).fill('nova')
+    await wallet.getByRole('combobox', { name: /^Rede/ }).click()
     await page.getByRole('option', { name: 'Ethereum' }).click()
-    await page.getByRole('combobox', { name: /^Tipo de carteira/ }).click()
+    await wallet.getByRole('combobox', { name: /^Tipo de carteira/ }).click()
     await page.getByRole('option', { name: 'MetaMask' }).click()
-    await page.getByRole('button', { name: 'Salvar carteira' }).click()
+    await wallet.getByRole('button', { name: 'Salvar carteira' }).click()
 
     await expect(page).toHaveURL(/\/pagamento$/)
     await expect(page.locator('label').filter({ hasText: 'Minha carteira' })).toBeVisible()
@@ -200,8 +201,12 @@ test.describe('@main @responsive E2E-06 pagamento: formulário, carteira e conex
     await field(page, 'Nome de exibição').fill('Outra Pessoa')
 
     await gotoApp(page, '/carteiras')
-    await expect(field(page, 'Endereço da carteira')).toHaveValue(ETH_ADDRESS)
-    await expect(field(page, 'Nome de exibição')).toHaveValue('Ana Colecionadora')
+    await expect(
+      primaryWallet(page).getByRole('textbox', { name: 'Endereço da carteira', exact: true }),
+    ).toHaveValue(ETH_ADDRESS)
+    await expect(
+      primaryWallet(page).getByRole('textbox', { name: 'Nome de exibição', exact: true }),
+    ).toHaveValue('Ana Colecionadora')
   })
 
   test('(5) sem overflow horizontal e teclado alcança "Confirmar compra"', async ({ page }) => {

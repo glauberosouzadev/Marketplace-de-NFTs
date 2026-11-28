@@ -1,0 +1,15 @@
+import { Link } from '@tanstack/react-router'
+
+export function FavoritesEmpty() {
+  return (
+    <div className="flex flex-col items-center gap-6 py-16 text-center">
+      <p className="text-muted-foreground max-w-md text-sm">Você ainda não favoritou nenhum NFT.</p>
+      <Link
+        to="/"
+        className="bg-primary-gradient text-primary-foreground focus-visible:ring-ring focus-visible:ring-offset-background md:bg-primary inline-flex h-[60px] items-center rounded-full px-8 text-sm font-bold outline-none hover:brightness-110 focus-visible:ring-2 focus-visible:ring-offset-2 md:h-[45px] md:rounded-md md:bg-none"
+      >
+        Explorar NFTs
+      </Link>
+    </div>
+  )
+}
